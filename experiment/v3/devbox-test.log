@@ -1,0 +1,434 @@
+开始时间: 2026-09-23 10:52:12
+---
+
+[1;34m========================================[0m
+[1;34m  1. 同步代码到 devbox-boe (rsync)[0m
+[1;34m========================================[0m
+
+[1;32m[OK][0m 代码同步完成
+
+[1;34m========================================[0m
+[1;34m  2a. 检查 Go 版本 (需要 >= 1.22)[0m
+[1;34m========================================[0m
+
+远端 Go 版本: go version go1.26.0 linux/amd64
+[1;32m[OK][0m Go 版本满足要求
+
+[1;34m========================================[0m
+[1;34m  2b. 编译项目 (go build)[0m
+[1;34m========================================[0m
+
+go: downloading go.temporal.io/sdk v1.49.0
+go: downloading go.opentelemetry.io/otel v1.46.0
+go: downloading go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.46.0
+go: downloading go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.46.0
+go: downloading go.opentelemetry.io/otel/metric v1.46.0
+go: downloading go.opentelemetry.io/otel/sdk/metric v1.46.0
+go: downloading go.opentelemetry.io/otel/sdk v1.46.0
+go: downloading go.opentelemetry.io/otel/trace v1.46.0
+go: downloading go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0
+go: downloading go.temporal.io/api v1.63.5
+go: downloading github.com/nexus-rpc/sdk-go v0.7.0
+go: downloading google.golang.org/grpc v1.83.2
+go: downloading google.golang.org/protobuf v1.36.11
+go: downloading github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
+go: downloading github.com/robfig/cron v1.2.0
+go: downloading github.com/stretchr/testify v1.12.1
+go: downloading golang.org/x/time v0.16.0
+go: downloading github.com/go-logr/logr v1.4.4
+go: downloading go.opentelemetry.io/auto/sdk v1.2.1
+go: downloading golang.org/x/sys v0.47.0
+go: downloading github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0
+go: downloading github.com/nexus-rpc/nexus-proto-annotations v0.1.0
+go: downloading google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa
+go: downloading github.com/stretchr/objx v0.5.3
+go: downloading golang.org/x/net v0.58.0
+go: downloading go.yaml.in/yaml/v3 v3.0.5
+go: downloading golang.org/x/text v0.41.0
+[1;32m[OK][0m 项目编译成功
+
+[1;34m========================================[0m
+[1;34m  2c. 运行单元测试 (wal / runtime / observe / protect)[0m
+[1;34m========================================[0m
+
+=== RUN   TestWriteAndRead
+--- PASS: TestWriteAndRead (0.01s)
+=== RUN   TestBuildManifest
+--- PASS: TestBuildManifest (0.00s)
+=== RUN   TestCorruptDetection
+--- PASS: TestCorruptDetection (0.02s)
+=== RUN   TestNewRecordTypes
+--- PASS: TestNewRecordTypes (0.00s)
+=== RUN   TestFsyncLatency
+--- PASS: TestFsyncLatency (0.00s)
+=== RUN   TestFileRotation
+--- PASS: TestFileRotation (0.19s)
+PASS
+ok  	agent-fabric/wal	0.237s
+=== RUN   TestNew_CreatesRuntime
+--- PASS: TestNew_CreatesRuntime (0.00s)
+=== RUN   TestRun_BasicExecution
+--- PASS: TestRun_BasicExecution (0.01s)
+=== RUN   TestRun_Recovery
+--- PASS: TestRun_Recovery (0.01s)
+=== RUN   TestStep_Timeout
+    runtime_test.go:200: step timed out correctly in 201.928764ms
+--- PASS: TestStep_Timeout (0.20s)
+=== RUN   TestRun_JobTimeout
+    runtime_test.go:239: job timed out after 2 steps in 503.002636ms
+--- PASS: TestRun_JobTimeout (0.50s)
+=== RUN   TestStep_Retry
+--- PASS: TestStep_Retry (0.01s)
+=== RUN   TestRun_Cancel
+    runtime_test.go:327: run cancelled in 201.970908ms with err: context canceled
+--- PASS: TestRun_Cancel (0.20s)
+=== RUN   TestStep_OTELTrace
+    runtime_test.go:399: trace output length: 2988 bytes
+--- PASS: TestStep_OTELTrace (0.00s)
+PASS
+ok  	agent-fabric/runtime	0.941s
+=== RUN   TestNewTracer_Stdout
+{
+	"Name": "test-span",
+	"SpanContext": {
+		"TraceID": "2a9438c851bd0eed7bbf5c312755deac",
+		"SpanID": "8324dc36810d74b5",
+		"TraceFlags": "01",
+		"TraceState": "",
+		"Remote": false
+	},
+	"Parent": {
+		"TraceID": "00000000000000000000000000000000",
+		"SpanID": "0000000000000000",
+		"TraceFlags": "00",
+		"TraceState": "",
+		"Remote": false
+	},
+	"SpanKind": 1,
+	"StartTime": "2026-09-23T02:52:46.170122853Z",
+	"EndTime": "2026-09-23T02:52:46.170147936Z",
+	"Attributes": null,
+	"Events": null,
+	"Links": null,
+	"Status": {
+		"Code": "Unset",
+		"Description": ""
+	},
+	"DroppedAttributes": 0,
+	"DroppedEvents": 0,
+	"DroppedLinks": 0,
+	"ChildSpanCount": 0,
+	"Resource": [
+		{
+			"Key": "service.name",
+			"Value": {
+				"Type": "STRING",
+				"Value": "unknown_service:observe.test"
+			}
+		},
+		{
+			"Key": "telemetry.sdk.language",
+			"Value": {
+				"Type": "STRING",
+				"Value": "go"
+			}
+		},
+		{
+			"Key": "telemetry.sdk.name",
+			"Value": {
+				"Type": "STRING",
+				"Value": "opentelemetry"
+			}
+		},
+		{
+			"Key": "telemetry.sdk.version",
+			"Value": {
+				"Type": "STRING",
+				"Value": "1.46.0"
+			}
+		}
+	],
+	"InstrumentationScope": {
+		"Name": "agent-fabric",
+		"Version": "",
+		"SchemaURL": "",
+		"Attributes": null
+	},
+	"InstrumentationLibrary": {
+		"Name": "agent-fabric",
+		"Version": "",
+		"SchemaURL": "",
+		"Attributes": null
+	}
+}
+--- PASS: TestNewTracer_Stdout (0.00s)
+=== RUN   TestNewTracer_Noop
+--- PASS: TestNewTracer_Noop (0.00s)
+=== RUN   TestNewMetrics_Stdout
+{"Resource":[{"Key":"service.name","Value":{"Type":"STRING","Value":"unknown_service:observe.test"}},{"Key":"telemetry.sdk.language","Value":{"Type":"STRING","Value":"go"}},{"Key":"telemetry.sdk.name","Value":{"Type":"STRING","Value":"opentelemetry"}},{"Key":"telemetry.sdk.version","Value":{"Type":"STRING","Value":"1.46.0"}}],"ScopeMetrics":[{"Scope":{"Name":"agent-fabric","Version":"","SchemaURL":"","Attributes":null},"Metrics":[{"Name":"af_step_total","Description":"Total number of steps executed","Unit":"","Data":{"DataPoints":[{"Attributes":[{"Key":"af.step.id","Value":{"Type":"STRING","Value":"step-1"}},{"Key":"error","Value":{"Type":"BOOL","Value":false}}],"StartTime":"2026-09-23T02:52:46.170728321Z","Time":"2026-09-23T02:52:46.170803929Z","Value":1}],"Temporality":"CumulativeTemporality","IsMonotonic":true}},{"Name":"af_step_duration_seconds","Description":"Step execution duration in seconds","Unit":"","Data":{"DataPoints":[{"Attributes":[{"Key":"af.step.id","Value":{"Type":"STRING","Value":"step-1"}},{"Key":"error","Value":{"Type":"BOOL","Value":false}}],"StartTime":"2026-09-23T02:52:46.17073972Z","Time":"2026-09-23T02:52:46.170809174Z","Count":1,"Bounds":[0,5,10,25,50,75,100,250,500,750,1000,2500,5000,7500,10000],"BucketCounts":[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"Min":0.15,"Max":0.15,"Sum":0.15}],"Temporality":"CumulativeTemporality"}},{"Name":"af_wal_fsync_seconds","Description":"WAL fsync duration in seconds","Unit":"","Data":{"DataPoints":[{"Attributes":[],"StartTime":"2026-09-23T02:52:46.17074629Z","Time":"2026-09-23T02:52:46.170818547Z","Count":1,"Bounds":[0,5,10,25,50,75,100,250,500,750,1000,2500,5000,7500,10000],"BucketCounts":[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"Min":0.005,"Max":0.005,"Sum":0.005}],"Temporality":"CumulativeTemporality"}}]}]}
+--- PASS: TestNewMetrics_Stdout (0.00s)
+=== RUN   TestStartSpan_WithAttributes
+{
+	"Name": "attr-span",
+	"SpanContext": {
+		"TraceID": "bdf232ba3c784edea83fc0dd0e295ca6",
+		"SpanID": "a8b859dacf973e0c",
+		"TraceFlags": "01",
+		"TraceState": "",
+		"Remote": false
+	},
+	"Parent": {
+		"TraceID": "00000000000000000000000000000000",
+		"SpanID": "0000000000000000",
+		"TraceFlags": "00",
+		"TraceState": "",
+		"Remote": false
+	},
+	"SpanKind": 1,
+	"StartTime": "2026-09-23T02:52:46.171033502Z",
+	"EndTime": "2026-09-23T02:52:46.171036374Z",
+	"Attributes": [
+		{
+			"Key": "af.step.id",
+			"Value": {
+				"Type": "STRING",
+				"Value": "build-42"
+			}
+		},
+		{
+			"Key": "af.step.skipped",
+			"Value": {
+				"Type": "BOOL",
+				"Value": false
+			}
+		},
+		{
+			"Key": "af.step.exit_code",
+			"Value": {
+				"Type": "INT64",
+				"Value": 0
+			}
+		},
+		{
+			"Key": "af.recovery_mode",
+			"Value": {
+				"Type": "BOOL",
+				"Value": true
+			}
+		}
+	],
+	"Events": null,
+	"Links": null,
+	"Status": {
+		"Code": "Unset",
+		"Description": ""
+	},
+	"DroppedAttributes": 0,
+	"DroppedEvents": 0,
+	"DroppedLinks": 0,
+	"ChildSpanCount": 0,
+	"Resource": [
+		{
+			"Key": "service.name",
+			"Value": {
+				"Type": "STRING",
+				"Value": "unknown_service:observe.test"
+			}
+		},
+		{
+			"Key": "telemetry.sdk.language",
+			"Value": {
+				"Type": "STRING",
+				"Value": "go"
+			}
+		},
+		{
+			"Key": "telemetry.sdk.name",
+			"Value": {
+				"Type": "STRING",
+				"Value": "opentelemetry"
+			}
+		},
+		{
+			"Key": "telemetry.sdk.version",
+			"Value": {
+				"Type": "STRING",
+				"Value": "1.46.0"
+			}
+		}
+	],
+	"InstrumentationScope": {
+		"Name": "agent-fabric",
+		"Version": "",
+		"SchemaURL": "",
+		"Attributes": null
+	},
+	"InstrumentationLibrary": {
+		"Name": "agent-fabric",
+		"Version": "",
+		"SchemaURL": "",
+		"Attributes": null
+	}
+}
+--- PASS: TestStartSpan_WithAttributes (0.00s)
+PASS
+ok  	agent-fabric/observe	0.005s
+=== RUN   TestApplyStepTimeout_Expires
+--- PASS: TestApplyStepTimeout_Expires (0.10s)
+=== RUN   TestApplyStepTimeout_NoTimeout
+--- PASS: TestApplyStepTimeout_NoTimeout (0.00s)
+=== RUN   TestRetryExecute_NoRetry
+--- PASS: TestRetryExecute_NoRetry (0.00s)
+=== RUN   TestRetryExecute_Success
+--- PASS: TestRetryExecute_Success (0.02s)
+=== RUN   TestRetryExecute_AllFail
+--- PASS: TestRetryExecute_AllFail (0.02s)
+=== RUN   TestRetryExecute_RetryOn
+--- PASS: TestRetryExecute_RetryOn (0.01s)
+=== RUN   TestRetryExecute_ContextCancel
+--- PASS: TestRetryExecute_ContextCancel (0.05s)
+=== RUN   TestExponentialBackoff
+--- PASS: TestExponentialBackoff (0.14s)
+PASS
+ok  	agent-fabric/protect	0.345s
+[1;32m[OK][0m 单元测试全部通过
+
+[1;34m========================================[0m
+[1;34m  2d. 运行 v3 验收测试 (experiment/v3)[0m
+[1;34m========================================[0m
+
+=== RUN   TestP1_S0_NormalOverhead
+    acceptance_test.go:182: trial 1: native=700.393958ms  af=711.357467ms  overhead=1.57%
+    acceptance_test.go:182: trial 2: native=700.498278ms  af=709.985878ms  overhead=1.35%
+    acceptance_test.go:182: trial 3: native=700.429336ms  af=710.523488ms  overhead=1.44%
+    acceptance_test.go:182: trial 4: native=700.405181ms  af=710.165435ms  overhead=1.39%
+    acceptance_test.go:182: trial 5: native=700.436346ms  af=710.169091ms  overhead=1.39%
+    acceptance_test.go:188: mean overhead=1.43%  stddev=0.07%  pass=true
+--- PASS: TestP1_S0_NormalOverhead (7.06s)
+=== RUN   TestP2_S1_RecoverySkipRate
+    acceptance_test.go:222: trial 1: completedBefore=3  skipped=3  rate=100%
+    acceptance_test.go:222: trial 2: completedBefore=3  skipped=3  rate=100%
+    acceptance_test.go:222: trial 3: completedBefore=3  skipped=3  rate=100%
+    acceptance_test.go:222: trial 4: completedBefore=3  skipped=3  rate=100%
+    acceptance_test.go:222: trial 5: completedBefore=3  skipped=3  rate=100%
+    acceptance_test.go:227: mean skip rate=100%  pass=true
+--- PASS: TestP2_S1_RecoverySkipRate (4.34s)
+=== RUN   TestP3_S1_RecoveryTime
+    acceptance_test.go:261: trial 1: recovery=304ms  native=700.424357ms  ratio=0.43
+    acceptance_test.go:261: trial 2: recovery=304ms  native=700.335848ms  ratio=0.43
+    acceptance_test.go:261: trial 3: recovery=304ms  native=700.353ms  ratio=0.43
+    acceptance_test.go:261: trial 4: recovery=307ms  native=700.417299ms  ratio=0.44
+    acceptance_test.go:261: trial 5: recovery=304ms  native=700.421553ms  ratio=0.43
+    acceptance_test.go:266: mean ratio=0.435  pass=true
+--- PASS: TestP3_S1_RecoveryTime (7.35s)
+=== RUN   TestP4_S3_ConcurrentOverhead
+    acceptance_test.go:309: trial 1: native=700.406799ms  avg_concurrent=711ms  overhead=1.62%
+    acceptance_test.go:309: trial 2: native=700.360072ms  avg_concurrent=710ms  overhead=1.43%
+    acceptance_test.go:309: trial 3: native=700.536954ms  avg_concurrent=709ms  overhead=1.33%
+    acceptance_test.go:309: trial 4: native=700.476789ms  avg_concurrent=712ms  overhead=1.76%
+    acceptance_test.go:309: trial 5: native=700.309407ms  avg_concurrent=709ms  overhead=1.29%
+    acceptance_test.go:314: mean concurrent overhead=1.49%  pass=true
+--- PASS: TestP4_S3_ConcurrentOverhead (7.06s)
+=== RUN   TestP5_WALFsyncLatency
+    acceptance_test.go:370: total fsyncs=350  mean=1.084ms  P99=1.800ms  pass=true
+--- PASS: TestP5_WALFsyncLatency (0.41s)
+=== RUN   TestP6_OTELTraceOverhead
+    acceptance_test.go:430: trial 1: noop=709ms  stdout=710ms  overhead=0.14%
+    acceptance_test.go:430: trial 2: noop=710ms  stdout=711ms  overhead=0.14%
+    acceptance_test.go:430: trial 3: noop=710ms  stdout=710ms  overhead=0.00%
+    acceptance_test.go:430: trial 4: noop=709ms  stdout=709ms  overhead=0.00%
+    acceptance_test.go:430: trial 5: noop=713ms  stdout=711ms  overhead=-0.28%
+    acceptance_test.go:435: mean OTEL trace overhead=0.00%  pass=true
+--- PASS: TestP6_OTELTraceOverhead (7.13s)
+=== RUN   TestP7_CodeLineCount
+    acceptance_test.go:455: total non-test lines: 1095
+--- PASS: TestP7_CodeLineCount (0.01s)
+=== RUN   TestR1_BasicRecovery
+--- PASS: TestR1_BasicRecovery (0.77s)
+=== RUN   TestR2_WALContinuity
+    acceptance_test.go:509: WAL records=15, all seqs continuous
+--- PASS: TestR2_WALContinuity (0.77s)
+=== RUN   TestR3_RecoveryOTELSkipped
+    acceptance_test.go:527: OTEL stdout output contains af.step.skipped: OK (output length=12196)
+--- PASS: TestR3_RecoveryOTELSkipped (0.39s)
+=== RUN   TestR4_MultiCrashRecovery
+    acceptance_test.go:547: R4: completedSteps=7  skipped=5
+--- PASS: TestR4_MultiCrashRecovery (0.45s)
+=== RUN   TestR5_WALCorruptDetection
+    acceptance_test.go:592: R5: corruption detected: wal: corrupt WAL file: unexpected end of JSON input
+--- PASS: TestR5_WALCorruptDetection (0.07s)
+=== RUN   TestF1_ZeroDependencyStartup
+--- PASS: TestF1_ZeroDependencyStartup (0.15s)
+=== RUN   TestF2_WALIntegrity
+--- PASS: TestF2_WALIntegrity (0.15s)
+=== RUN   TestF3_StepTimeout
+    acceptance_test.go:674: F3: elapsed=502.245748ms
+--- PASS: TestF3_StepTimeout (0.50s)
+=== RUN   TestF4_JobTimeout
+    acceptance_test.go:703: F4: elapsed=2.003481348s  completedSteps=3
+--- PASS: TestF4_JobTimeout (2.00s)
+=== RUN   TestF5_RetrySuccess
+--- PASS: TestF5_RetrySuccess (0.05s)
+=== RUN   TestF6_RetryWALRecord
+--- PASS: TestF6_RetryWALRecord (0.05s)
+=== RUN   TestF7_CancelTermination
+    acceptance_test.go:796: F7: cancel-to-return=1.789031ms
+--- PASS: TestF7_CancelTermination (1.00s)
+=== RUN   TestF8_OTELTraceOutput
+    acceptance_test.go:817: F8: rootSpans=1  stepSpans=7  total=8  outputLen=12194
+--- PASS: TestF8_OTELTraceOutput (0.23s)
+=== RUN   TestF9_OTELMetricsOutput
+    acceptance_test.go:838: F9: metrics output length=5597
+--- PASS: TestF9_OTELMetricsOutput (0.22s)
+=== RUN   TestB1_GoBuild
+--- PASS: TestB1_GoBuild (0.08s)
+=== RUN   TestB2_NoCGO
+--- PASS: TestB2_NoCGO (4.65s)
+=== RUN   TestB3_CrossPlatform
+    acceptance_test.go:864: already on linux/amd64
+--- SKIP: TestB3_CrossPlatform (0.00s)
+PASS
+ok  	agent-fabric/experiment/v3	44.897s
+[1;32m[OK][0m 验收测试全部通过
+
+[1;34m========================================[0m
+[1;34m  2e. 列出远端测试结果[0m
+[1;34m========================================[0m
+
+total 36K
+-rw-r--r-- 1 wangchaoyu.v2 wangchaoyu.v2 1004 Sep 23 02:52 P1_normal_overhead.json
+-rw-r--r-- 1 wangchaoyu.v2 wangchaoyu.v2  914 Sep 23 02:53 P2_recovery_skip_rate.json
+-rw-r--r-- 1 wangchaoyu.v2 wangchaoyu.v2 1.0K Sep 23 02:53 P3_recovery_time.json
+-rw-r--r-- 1 wangchaoyu.v2 wangchaoyu.v2 1.1K Sep 23 02:53 P4_concurrent_overhead.json
+-rw-r--r-- 1 wangchaoyu.v2 wangchaoyu.v2 5.0K Sep 23 02:53 P5_wal_fsync_latency.json
+-rw-r--r-- 1 wangchaoyu.v2 wangchaoyu.v2  996 Sep 23 02:53 P6_otel_trace_overhead.json
+-rw-r--r-- 1 wangchaoyu.v2 wangchaoyu.v2  432 Sep 23 02:53 P7_code_line_count.json
+-rw-r--r-- 1 wangchaoyu.v2 wangchaoyu.v2  410 Sep 23 02:53 R1_basic_recovery.json
+
+[1;34m========================================[0m
+[1;34m  3. 下载结果到本地[0m
+[1;34m========================================[0m
+
+[1;32m[OK][0m 结果已下载到: /Users/bytedance/Library/Application Support/TRAE SOLO CN/ModularData/ai-agent/work-mode-projects/6aaa8c59d452fad7eed3a03b/experiment/v3/results/
+
+本地结果文件:
+total 72
+-rw-r--r--@ 1 bytedance  staff   1.0K  9月 23 10:52 P1_normal_overhead.json
+-rw-r--r--@ 1 bytedance  staff   914B  9月 23 10:53 P2_recovery_skip_rate.json
+-rw-r--r--@ 1 bytedance  staff   1.0K  9月 23 10:53 P3_recovery_time.json
+-rw-r--r--@ 1 bytedance  staff   1.0K  9月 23 10:53 P4_concurrent_overhead.json
+-rw-r--r--@ 1 bytedance  staff   5.0K  9月 23 10:53 P5_wal_fsync_latency.json
+-rw-r--r--@ 1 bytedance  staff   996B  9月 23 10:53 P6_otel_trace_overhead.json
+-rw-r--r--@ 1 bytedance  staff   432B  9月 23 10:53 P7_code_line_count.json
+-rw-r--r--@ 1 bytedance  staff   410B  9月 23 10:53 R1_basic_recovery.json
+
+[1;34m========================================[0m
+[1;34m  全部完成[0m
+[1;34m========================================[0m
+
+结束时间: 2026-09-23 10:53:46
+完整日志: /Users/bytedance/Library/Application Support/TRAE SOLO CN/ModularData/ai-agent/work-mode-projects/6aaa8c59d452fad7eed3a03b/experiment/v3/devbox-test.log
+测试结果: /Users/bytedance/Library/Application Support/TRAE SOLO CN/ModularData/ai-agent/work-mode-projects/6aaa8c59d452fad7eed3a03b/experiment/v3/results/
+
+[1;32m[OK][0m Agent-Fabric v3 验收测试流程执行成功

@@ -1,0 +1,23 @@
+[
+  {
+    "metric_id": "R1",
+    "description": "Basic crash-at-4 recovery",
+    "target": "skipped=3, completed=7",
+    "trials": [
+      {
+        "completed": 7,
+        "skipped": 3
+      }
+    ],
+    "mean": 0,
+    "stddev": 0,
+    "pass": true,
+    "timestamp": "2026-09-23T04:56:05Z",
+    "environment": {
+      "arch": "arm64",
+      "cpus": "18",
+      "go": "go1.26.4",
+      "os": "darwin"
+    }
+  }
+]

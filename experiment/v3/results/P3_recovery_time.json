@@ -1,0 +1,49 @@
+[
+  {
+    "metric_id": "P3-S1",
+    "description": "Recovery wall-clock time vs native",
+    "target": "\u003c=0.50x",
+    "trials": [
+      {
+        "native_ms": 700,
+        "ratio": 0.44571428571428573,
+        "recovery_ms": 312,
+        "trial": 1
+      },
+      {
+        "native_ms": 700,
+        "ratio": 0.4442857142857143,
+        "recovery_ms": 311,
+        "trial": 2
+      },
+      {
+        "native_ms": 700,
+        "ratio": 0.4442857142857143,
+        "recovery_ms": 311,
+        "trial": 3
+      },
+      {
+        "native_ms": 700,
+        "ratio": 0.44571428571428573,
+        "recovery_ms": 312,
+        "trial": 4
+      },
+      {
+        "native_ms": 700,
+        "ratio": 0.44571428571428573,
+        "recovery_ms": 312,
+        "trial": 5
+      }
+    ],
+    "mean": 0.4451428571428572,
+    "stddev": 0.0006998542122237736,
+    "pass": true,
+    "timestamp": "2026-09-23T04:55:48Z",
+    "environment": {
+      "arch": "arm64",
+      "cpus": "18",
+      "go": "go1.26.4",
+      "os": "darwin"
+    }
+  }
+]

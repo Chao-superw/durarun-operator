@@ -1,0 +1,217 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentjobs.durarun.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: durarun.io
+  names:
+    kind: AgentJob
+    listKind: AgentJobList
+    plural: agentjobs
+    singular: agentjob
+    shortNames:
+      - aj
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: AgentJob is the Schema for the agentjobs API
+          type: object
+          required:
+            - spec
+          properties:
+            apiVersion:
+              description: >-
+                APIVersion defines the versioned schema of this representation
+                of an object.
+              type: string
+            kind:
+              description: >-
+                Kind is a string value representing the REST resource this
+                object represents.
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: AgentJobSpec defines the desired state of AgentJob
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  description: Container image to run for this agent job.
+                  type: string
+                command:
+                  description: Command to execute inside the container.
+                  type: array
+                  items:
+                    type: string
+                prompt:
+                  description: Prompt text to pass to the agent.
+                  type: string
+                timeout:
+                  description: >-
+                    Maximum duration the job is allowed to run. Defaults to 5m.
+                  type: string
+                  default: "5m"
+                resources:
+                  description: Resource requirements for the agent container.
+                  type: object
+                  properties:
+                    cpuLimit:
+                      description: CPU limit for the container (e.g. "500m", "2").
+                      type: string
+                    memoryLimit:
+                      description: Memory limit for the container (e.g. "256Mi", "1Gi").
+                      type: string
+                env:
+                  description: >-
+                    Environment variables to set in the container, as key-value
+                    pairs.
+                  type: object
+                  additionalProperties:
+                    type: string
+                maxRetries:
+                  description: >-
+                    Maximum number of retry attempts before marking the job as
+                    Failed.
+                  type: integer
+                  format: int32
+                isolation:
+                  description: Isolation configuration for the sandbox.
+                  type: object
+                  properties:
+                    level:
+                      description: >-
+                        Isolation level for running the agent workload.
+                      type: string
+                      enum:
+                        - L0Process
+                        - L1GVisor
+                        - L2Firecracker
+                        - L3Docker
+                poolRef:
+                  description: >-
+                    Reference to a SandboxPool to use for scheduling this job.
+                  type: string
+                stepTracking:
+                  description: Step tracking configuration.
+                  type: object
+                  properties:
+                    enabled:
+                      description: Whether step tracking is enabled.
+                      type: boolean
+                    protocol:
+                      description: Protocol used for step tracking.
+                      type: string
+                      enum:
+                        - env
+                        - hook
+                        - adapter
+                checkpoint:
+                  description: Checkpoint configuration for job recovery.
+                  type: object
+                  properties:
+                    enabled:
+                      description: Whether checkpointing is enabled.
+                      type: boolean
+                    bucket:
+                      description: Object storage bucket for checkpoint data.
+                      type: string
+                    endpoint:
+                      description: Object storage endpoint URL.
+                      type: string
+                    intervalSeconds:
+                      description: Interval in seconds between checkpoint snapshots.
+                      type: integer
+                      format: int32
+            status:
+              description: AgentJobStatus defines the observed state of AgentJob
+              type: object
+              properties:
+                phase:
+                  description: Current phase of the AgentJob lifecycle.
+                  type: string
+                  enum:
+                    - Pending
+                    - Scheduling
+                    - Running
+                    - Recovering
+                    - Succeeded
+                    - Failed
+                    - Terminated
+                activeAttempt:
+                  description: Reference to the currently active AgentAttempt.
+                  type: object
+                  properties:
+                    name:
+                      description: Name of the active AgentAttempt resource.
+                      type: string
+                    number:
+                      description: Attempt number (1-based).
+                      type: integer
+                      format: int32
+                    uid:
+                      description: UID of the active AgentAttempt resource.
+                      type: string
+                completedAttempts:
+                  description: Number of attempts that completed successfully.
+                  type: integer
+                  format: int32
+                failedAttempts:
+                  description: Number of attempts that failed.
+                  type: integer
+                  format: int32
+                conditions:
+                  description: >-
+                    Conditions represent the latest available observations of
+                    the AgentJob's state.
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - status
+                    properties:
+                      type:
+                        description: Type of the condition.
+                        type: string
+                      status:
+                        description: Status of the condition (True, False, Unknown).
+                        type: string
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                      reason:
+                        description: Machine-readable reason for the condition.
+                        type: string
+                      message:
+                        description: Human-readable message for the condition.
+                        type: string
+                      lastTransitionTime:
+                        description: Last time the condition transitioned.
+                        type: string
+                        format: date-time
+                startTime:
+                  description: Time when the job started executing.
+                  type: string
+                  format: date-time
+                completionTime:
+                  description: Time when the job completed (succeeded or failed).
+                  type: string
+                  format: date-time

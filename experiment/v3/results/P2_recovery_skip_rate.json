@@ -1,0 +1,49 @@
+[
+  {
+    "metric_id": "P2-S1",
+    "description": "Recovery skip rate",
+    "target": "\u003e=60%",
+    "trials": [
+      {
+        "completed_before": 3,
+        "skip_rate%": 100,
+        "skipped": 3,
+        "trial": 1
+      },
+      {
+        "completed_before": 3,
+        "skip_rate%": 100,
+        "skipped": 3,
+        "trial": 2
+      },
+      {
+        "completed_before": 3,
+        "skip_rate%": 100,
+        "skipped": 3,
+        "trial": 3
+      },
+      {
+        "completed_before": 3,
+        "skip_rate%": 100,
+        "skipped": 3,
+        "trial": 4
+      },
+      {
+        "completed_before": 3,
+        "skip_rate%": 100,
+        "skipped": 3,
+        "trial": 5
+      }
+    ],
+    "mean": 100,
+    "stddev": 0,
+    "pass": true,
+    "timestamp": "2026-09-23T04:55:40Z",
+    "environment": {
+      "arch": "arm64",
+      "cpus": "18",
+      "go": "go1.26.4",
+      "os": "darwin"
+    }
+  }
+]

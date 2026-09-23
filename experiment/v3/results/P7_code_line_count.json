@@ -1,0 +1,22 @@
+[
+  {
+    "metric_id": "P7",
+    "description": "Source code line count (runtime+wal+observe+protect+sandbox+pool, excl. tests)",
+    "target": "\u003c=2000",
+    "trials": [
+      {
+        "lines": 1125
+      }
+    ],
+    "mean": 1125,
+    "stddev": 0,
+    "pass": true,
+    "timestamp": "2026-09-23T04:56:04Z",
+    "environment": {
+      "arch": "arm64",
+      "cpus": "18",
+      "go": "go1.26.4",
+      "os": "darwin"
+    }
+  }
+]

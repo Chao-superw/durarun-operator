@@ -1,0 +1,269 @@
+[
+  {
+    "metric_id": "P5",
+    "description": "WAL fsync P99 latency",
+    "target": "\u003c=5ms",
+    "trials": [
+      {
+        "avg_us": 2960.690285714286,
+        "samples": 7,
+        "trial": 1
+      },
+      {
+        "avg_us": 3098.155,
+        "samples": 7,
+        "trial": 2
+      },
+      {
+        "avg_us": 3108.7318571428573,
+        "samples": 7,
+        "trial": 3
+      },
+      {
+        "avg_us": 2963.083142857143,
+        "samples": 7,
+        "trial": 4
+      },
+      {
+        "avg_us": 2947.6725714285712,
+        "samples": 7,
+        "trial": 5
+      },
+      {
+        "avg_us": 3369.351,
+        "samples": 7,
+        "trial": 6
+      },
+      {
+        "avg_us": 2955.643,
+        "samples": 7,
+        "trial": 7
+      },
+      {
+        "avg_us": 2917.4881428571425,
+        "samples": 7,
+        "trial": 8
+      },
+      {
+        "avg_us": 3071.964285714286,
+        "samples": 7,
+        "trial": 9
+      },
+      {
+        "avg_us": 3324.8868571428575,
+        "samples": 7,
+        "trial": 10
+      },
+      {
+        "avg_us": 2915.8214285714284,
+        "samples": 7,
+        "trial": 11
+      },
+      {
+        "avg_us": 2932.083285714286,
+        "samples": 7,
+        "trial": 12
+      },
+      {
+        "avg_us": 2911.726142857143,
+        "samples": 7,
+        "trial": 13
+      },
+      {
+        "avg_us": 2933.1785714285716,
+        "samples": 7,
+        "trial": 14
+      },
+      {
+        "avg_us": 2909.7855714285715,
+        "samples": 7,
+        "trial": 15
+      },
+      {
+        "avg_us": 2928.399,
+        "samples": 7,
+        "trial": 16
+      },
+      {
+        "avg_us": 3205.047714285714,
+        "samples": 7,
+        "trial": 17
+      },
+      {
+        "avg_us": 2921.75,
+        "samples": 7,
+        "trial": 18
+      },
+      {
+        "avg_us": 3327.75,
+        "samples": 7,
+        "trial": 19
+      },
+      {
+        "avg_us": 3063.5595714285714,
+        "samples": 7,
+        "trial": 20
+      },
+      {
+        "avg_us": 3332.0118571428575,
+        "samples": 7,
+        "trial": 21
+      },
+      {
+        "avg_us": 2915.2618571428575,
+        "samples": 7,
+        "trial": 22
+      },
+      {
+        "avg_us": 2920.8394285714285,
+        "samples": 7,
+        "trial": 23
+      },
+      {
+        "avg_us": 3205.815285714286,
+        "samples": 7,
+        "trial": 24
+      },
+      {
+        "avg_us": 3061.583285714286,
+        "samples": 7,
+        "trial": 25
+      },
+      {
+        "avg_us": 2933.351142857143,
+        "samples": 7,
+        "trial": 26
+      },
+      {
+        "avg_us": 2938.4285714285716,
+        "samples": 7,
+        "trial": 27
+      },
+      {
+        "avg_us": 2926.8154285714286,
+        "samples": 7,
+        "trial": 28
+      },
+      {
+        "avg_us": 3064.7141428571426,
+        "samples": 7,
+        "trial": 29
+      },
+      {
+        "avg_us": 3079.857,
+        "samples": 7,
+        "trial": 30
+      },
+      {
+        "avg_us": 2925.4821428571427,
+        "samples": 7,
+        "trial": 31
+      },
+      {
+        "avg_us": 3062.3274285714288,
+        "samples": 7,
+        "trial": 32
+      },
+      {
+        "avg_us": 3310.1967142857143,
+        "samples": 7,
+        "trial": 33
+      },
+      {
+        "avg_us": 2919.047857142857,
+        "samples": 7,
+        "trial": 34
+      },
+      {
+        "avg_us": 3217.9938571428575,
+        "samples": 7,
+        "trial": 35
+      },
+      {
+        "avg_us": 3059.1188571428575,
+        "samples": 7,
+        "trial": 36
+      },
+      {
+        "avg_us": 3908.1074285714285,
+        "samples": 7,
+        "trial": 37
+      },
+      {
+        "avg_us": 3063.547714285714,
+        "samples": 7,
+        "trial": 38
+      },
+      {
+        "avg_us": 2910.0891428571426,
+        "samples": 7,
+        "trial": 39
+      },
+      {
+        "avg_us": 2897.5594285714287,
+        "samples": 7,
+        "trial": 40
+      },
+      {
+        "avg_us": 3075.440285714286,
+        "samples": 7,
+        "trial": 41
+      },
+      {
+        "avg_us": 3210.244142857143,
+        "samples": 7,
+        "trial": 42
+      },
+      {
+        "avg_us": 2934.8335714285713,
+        "samples": 7,
+        "trial": 43
+      },
+      {
+        "avg_us": 3331.3037142857142,
+        "samples": 7,
+        "trial": 44
+      },
+      {
+        "avg_us": 3484.75,
+        "samples": 7,
+        "trial": 45
+      },
+      {
+        "avg_us": 3321.220285714286,
+        "samples": 7,
+        "trial": 46
+      },
+      {
+        "avg_us": 3082.0774285714288,
+        "samples": 7,
+        "trial": 47
+      },
+      {
+        "avg_us": 3293.4405714285713,
+        "samples": 7,
+        "trial": 48
+      },
+      {
+        "avg_us": 2947.0118571428575,
+        "samples": 7,
+        "trial": 49
+      },
+      {
+        "avg_us": 3031.434285714286,
+        "samples": 7,
+        "trial": 50
+      }
+    ],
+    "mean": 4.047209,
+    "stddev": 0,
+    "pass": true,
+    "timestamp": "2026-09-23T04:55:56Z",
+    "environment": {
+      "arch": "arm64",
+      "cpus": "18",
+      "go": "go1.26.4",
+      "os": "darwin"
+    }
+  }
+]

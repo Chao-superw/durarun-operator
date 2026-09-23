@@ -1,0 +1,372 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentjobs.durarun.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: durarun.io
+  names:
+    kind: AgentJob
+    listKind: AgentJobList
+    plural: agentjobs
+    singular: agentjob
+    shortNames:
+      - aj
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: AgentJob is the Schema for the agentjobs API
+          type: object
+          required:
+            - spec
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                command:
+                  type: array
+                  items:
+                    type: string
+                prompt:
+                  type: string
+                timeout:
+                  type: string
+                  default: "5m"
+                resources:
+                  type: object
+                  properties:
+                    cpuLimit:
+                      type: string
+                    memoryLimit:
+                      type: string
+                env:
+                  type: object
+                  additionalProperties:
+                    type: string
+                maxRetries:
+                  type: integer
+                  format: int32
+                isolation:
+                  type: object
+                  properties:
+                    level:
+                      type: string
+                      enum:
+                        - L0Process
+                        - L1GVisor
+                        - L2Firecracker
+                        - L3Docker
+                poolRef:
+                  type: string
+                stepTracking:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    protocol:
+                      type: string
+                      enum:
+                        - env
+                        - hook
+                        - adapter
+                checkpoint:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    bucket:
+                      type: string
+                    endpoint:
+                      type: string
+                    intervalSeconds:
+                      type: integer
+                      format: int32
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum:
+                    - Pending
+                    - Scheduling
+                    - Running
+                    - Recovering
+                    - Succeeded
+                    - Failed
+                    - Terminated
+                activeAttempt:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    number:
+                      type: integer
+                      format: int32
+                    uid:
+                      type: string
+                completedAttempts:
+                  type: integer
+                  format: int32
+                failedAttempts:
+                  type: integer
+                  format: int32
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - status
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                      reason:
+                        type: string
+                      message:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                startTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentattempts.durarun.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: durarun.io
+  names:
+    kind: AgentAttempt
+    listKind: AgentAttemptList
+    plural: agentattempts
+    singular: agentattempt
+    shortNames:
+      - aat
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: JobRef
+          type: string
+          jsonPath: .spec.jobRef
+        - name: Number
+          type: integer
+          jsonPath: .spec.number
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: PodName
+          type: string
+          jsonPath: .status.podName
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: AgentAttempt is the Schema for the agentattempts API
+          type: object
+          required:
+            - spec
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              required:
+                - jobRef
+                - number
+              properties:
+                jobRef:
+                  type: string
+                number:
+                  type: integer
+                  format: int32
+                  minimum: 1
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum:
+                    - Pending
+                    - Running
+                    - Succeeded
+                    - Failed
+                podName:
+                  type: string
+                podUID:
+                  type: string
+                exitCode:
+                  type: integer
+                  format: int32
+                startTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                message:
+                  type: string
+                reason:
+                  type: string
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: sandboxpools.durarun.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: durarun.io
+  names:
+    kind: SandboxPool
+    listKind: SandboxPoolList
+    plural: sandboxpools
+    singular: sandboxpool
+    shortNames:
+      - sp
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: MinSize
+          type: integer
+          jsonPath: .spec.minSize
+        - name: MaxSize
+          type: integer
+          jsonPath: .spec.maxSize
+        - name: TotalPods
+          type: integer
+          jsonPath: .status.totalPods
+        - name: IdlePods
+          type: integer
+          jsonPath: .status.idlePods
+        - name: Ready
+          type: boolean
+          jsonPath: .status.ready
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: SandboxPool is the Schema for the sandboxpools API
+          type: object
+          required:
+            - spec
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              required:
+                - minSize
+                - maxSize
+              properties:
+                minSize:
+                  type: integer
+                  format: int32
+                  minimum: 0
+                maxSize:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                thresholds:
+                  type: object
+                  properties:
+                    scaleUpThreshold:
+                      type: number
+                      format: double
+                    scaleDownThreshold:
+                      type: number
+                      format: double
+                    scaleUpStep:
+                      type: integer
+                      format: int32
+                    cooldownSeconds:
+                      type: integer
+                      format: int32
+                template:
+                  type: object
+                  properties:
+                    image:
+                      type: string
+                    resources:
+                      type: object
+                      properties:
+                        cpuLimit:
+                          type: string
+                        memoryLimit:
+                          type: string
+                    env:
+                      type: object
+                      additionalProperties:
+                        type: string
+                runtimeClassName:
+                  type: string
+            status:
+              type: object
+              properties:
+                totalPods:
+                  type: integer
+                  format: int32
+                idlePods:
+                  type: integer
+                  format: int32
+                claimedPods:
+                  type: integer
+                  format: int32
+                ready:
+                  type: boolean

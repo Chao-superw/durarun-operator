@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: durarun-operator
+  labels:
+    app.kubernetes.io/name: durarun-operator
+    app.kubernetes.io/part-of: durarun
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: durarun-operator
+subjects:
+  - kind: ServiceAccount
+    name: durarun-operator
+    namespace: durarun-system

@@ -1,0 +1,33 @@
+# DuraRun Operator Helm Values
+
+replicaCount: 2
+
+image:
+  repository: durarun-operator
+  tag: latest
+  pullPolicy: IfNotPresent
+
+leaderElection:
+  enabled: true
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+serviceAccount:
+  create: true
+  name: durarun-operator
+
+namespace: durarun-system
+
+healthProbe:
+  livenessPath: /healthz
+  readinessPath: /readyz
+  port: 8081
+
+metrics:
+  port: 8080

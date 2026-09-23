@@ -1,0 +1,49 @@
+[
+  {
+    "metric_id": "P1-S0",
+    "description": "Normal 7-step overhead vs native",
+    "target": "\u003c=+5%",
+    "trials": [
+      {
+        "af_ms": 737,
+        "native_ms": 700,
+        "overhead%": 5.305589320480799,
+        "trial": 1
+      },
+      {
+        "af_ms": 728,
+        "native_ms": 700,
+        "overhead%": 4.003395870678388,
+        "trial": 2
+      },
+      {
+        "af_ms": 730,
+        "native_ms": 700,
+        "overhead%": 4.2853619437925525,
+        "trial": 3
+      },
+      {
+        "af_ms": 729,
+        "native_ms": 700,
+        "overhead%": 4.140574637725014,
+        "trial": 4
+      },
+      {
+        "af_ms": 729,
+        "native_ms": 700,
+        "overhead%": 4.234751459864142,
+        "trial": 5
+      }
+    ],
+    "mean": 4.393934646508179,
+    "stddev": 0.465822582693988,
+    "pass": true,
+    "timestamp": "2026-09-23T04:55:35Z",
+    "environment": {
+      "arch": "arm64",
+      "cpus": "18",
+      "go": "go1.26.4",
+      "os": "darwin"
+    }
+  }
+]

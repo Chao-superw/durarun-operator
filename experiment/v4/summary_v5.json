@@ -1,0 +1,123 @@
+{
+  "generated_at": "2026-09-20T08:33:48.106247+00:00",
+  "total_results": 144,
+  "errors": 0,
+  "s0_aggregates": {
+    "native": {
+      "avg": 24538.911111111112,
+      "min": 19331.3,
+      "max": 29296.4,
+      "stddev": 3022.9399040687385,
+      "n": 9
+    },
+    "durarun": {
+      "avg": 25428.3,
+      "min": 19995.5,
+      "max": 29384.1,
+      "stddev": 3514.5267512141654,
+      "n": 9
+    },
+    "langgraph": {
+      "avg": 25481.455555555556,
+      "min": 20049.8,
+      "max": 29662.7,
+      "stddev": 3018.4560958837515,
+      "n": 9
+    },
+    "temporal": {
+      "avg": 24849.911111111112,
+      "min": 22092.1,
+      "max": 28083.2,
+      "stddev": 2055.806647914904,
+      "n": 9
+    }
+  },
+  "verdicts": [
+    {
+      "id": "B-1",
+      "desc": "S0 overhead vs Native",
+      "target": "\u2264 +10%",
+      "actual": "+3.6%",
+      "status": "PASS"
+    },
+    {
+      "id": "B-2",
+      "desc": "S1 \u6062\u590d\u8017\u65f6 vs S0 \u5168\u91cf",
+      "target": "\u2264 50%",
+      "actual": "40.9%",
+      "status": "PASS"
+    },
+    {
+      "id": "B-3",
+      "desc": "S1 \u8df3\u6b65\u7387",
+      "target": "\u2265 60%",
+      "actual": "60%",
+      "status": "PASS"
+    },
+    {
+      "id": "B-4",
+      "desc": "S2 \u81ea\u52a8\u91cd\u8bd5\u6210\u529f\u7387",
+      "target": "100%",
+      "actual": "100%",
+      "status": "PASS"
+    },
+    {
+      "id": "B-5",
+      "desc": "S3 \u5e76\u53d1 overhead vs S0",
+      "target": "\u2264 +15%",
+      "actual": "+13.6%",
+      "status": "PASS"
+    },
+    {
+      "id": "B-6",
+      "desc": "S4 OTEL \u6027\u80fd\u9000\u5316",
+      "target": "\u2264 2%",
+      "actual": "+4.89%",
+      "status": "FAIL"
+    },
+    {
+      "id": "B-7",
+      "desc": "S5 \u63a5\u5165 LOC",
+      "target": "\u2264 20",
+      "actual": "15",
+      "status": "PASS"
+    },
+    {
+      "id": "B-8",
+      "desc": "S5 \u4f9d\u8d56\u5305\u6570",
+      "target": "\u2264 10",
+      "actual": "4",
+      "status": "PASS"
+    }
+  ],
+  "radar_scores": {
+    "native": [
+      100,
+      80,
+      100.0,
+      46.7,
+      98.0
+    ],
+    "durarun": [
+      81.9,
+      80,
+      100.0,
+      59.3,
+      92.0
+    ],
+    "langgraph": [
+      80.8,
+      80,
+      100.0,
+      54.2,
+      70.0
+    ],
+    "temporal": [
+      93.7,
+      30,
+      100.0,
+      61.4,
+      31.0
+    ]
+  }
+}

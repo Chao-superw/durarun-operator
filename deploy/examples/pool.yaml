@@ -1,0 +1,18 @@
+apiVersion: durarun.io/v1alpha1
+kind: SandboxPool
+metadata:
+  name: default-pool
+spec:
+  minSize: 3
+  maxSize: 20
+  thresholds:
+    scaleUpThreshold: 0.3
+    scaleDownThreshold: 0.7
+    scaleUpStep: 2
+    cooldownSeconds: 60
+  template:
+    image: busybox:latest
+    resources:
+      cpuLimit: "500m"
+      memoryLimit: "256Mi"
+  runtimeClassName: runsc

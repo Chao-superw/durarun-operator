@@ -1,0 +1,146 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: sandboxpools.durarun.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: durarun.io
+  names:
+    kind: SandboxPool
+    listKind: SandboxPoolList
+    plural: sandboxpools
+    singular: sandboxpool
+    shortNames:
+      - sp
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: MinSize
+          type: integer
+          jsonPath: .spec.minSize
+        - name: MaxSize
+          type: integer
+          jsonPath: .spec.maxSize
+        - name: TotalPods
+          type: integer
+          jsonPath: .status.totalPods
+        - name: IdlePods
+          type: integer
+          jsonPath: .status.idlePods
+        - name: Ready
+          type: boolean
+          jsonPath: .status.ready
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: SandboxPool is the Schema for the sandboxpools API
+          type: object
+          required:
+            - spec
+          properties:
+            apiVersion:
+              description: >-
+                APIVersion defines the versioned schema of this representation
+                of an object.
+              type: string
+            kind:
+              description: >-
+                Kind is a string value representing the REST resource this
+                object represents.
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: SandboxPoolSpec defines the desired state of SandboxPool
+              type: object
+              required:
+                - minSize
+                - maxSize
+              properties:
+                minSize:
+                  description: Minimum number of warm pods to maintain in the pool.
+                  type: integer
+                  format: int32
+                  minimum: 0
+                maxSize:
+                  description: Maximum number of pods the pool can scale to.
+                  type: integer
+                  format: int32
+                  minimum: 1
+                thresholds:
+                  description: Auto-scaling thresholds for the pool.
+                  type: object
+                  properties:
+                    scaleUpThreshold:
+                      description: >-
+                        Ratio of idle-to-total below which the pool scales up.
+                      type: number
+                      format: double
+                    scaleDownThreshold:
+                      description: >-
+                        Ratio of idle-to-total above which the pool scales down.
+                      type: number
+                      format: double
+                    scaleUpStep:
+                      description: Number of pods to add per scale-up event.
+                      type: integer
+                      format: int32
+                    cooldownSeconds:
+                      description: >-
+                        Minimum seconds to wait between consecutive scaling
+                        actions.
+                      type: integer
+                      format: int32
+                template:
+                  description: Pod template for warm pool pods.
+                  type: object
+                  properties:
+                    image:
+                      description: Default container image for pool pods.
+                      type: string
+                    resources:
+                      description: Resource requirements for pool pods.
+                      type: object
+                      properties:
+                        cpuLimit:
+                          description: CPU limit for pool pods.
+                          type: string
+                        memoryLimit:
+                          description: Memory limit for pool pods.
+                          type: string
+                    env:
+                      description: Default environment variables for pool pods.
+                      type: object
+                      additionalProperties:
+                        type: string
+                runtimeClassName:
+                  description: >-
+                    RuntimeClass to use for pool pods (e.g. runsc for gVisor).
+                  type: string
+            status:
+              description: SandboxPoolStatus defines the observed state of SandboxPool
+              type: object
+              properties:
+                totalPods:
+                  description: Total number of pods currently managed by the pool.
+                  type: integer
+                  format: int32
+                idlePods:
+                  description: Number of idle (unclaimed) pods in the pool.
+                  type: integer
+                  format: int32
+                claimedPods:
+                  description: Number of pods currently claimed by AgentJobs.
+                  type: integer
+                  format: int32
+                ready:
+                  description: Whether the pool has reached its minimum size.
+                  type: boolean

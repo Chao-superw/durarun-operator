@@ -1,0 +1,49 @@
+[
+  {
+    "metric_id": "P6",
+    "description": "OTEL stdout trace exporter overhead vs noop",
+    "target": "\u003c=+2%",
+    "trials": [
+      {
+        "noop_ms": 727,
+        "overhead%": 0.2751031636863824,
+        "stdout_ms": 729,
+        "trial": 1
+      },
+      {
+        "noop_ms": 728,
+        "overhead%": 0.13736263736263737,
+        "stdout_ms": 729,
+        "trial": 2
+      },
+      {
+        "noop_ms": 729,
+        "overhead%": -0.1371742112482853,
+        "stdout_ms": 728,
+        "trial": 3
+      },
+      {
+        "noop_ms": 727,
+        "overhead%": 0.5502063273727648,
+        "stdout_ms": 731,
+        "trial": 4
+      },
+      {
+        "noop_ms": 729,
+        "overhead%": -0.2743484224965706,
+        "stdout_ms": 727,
+        "trial": 5
+      }
+    ],
+    "mean": 0.11022989893538573,
+    "stddev": 0.29346479024098315,
+    "pass": true,
+    "timestamp": "2026-09-23T04:56:04Z",
+    "environment": {
+      "arch": "arm64",
+      "cpus": "18",
+      "go": "go1.26.4",
+      "os": "darwin"
+    }
+  }
+]

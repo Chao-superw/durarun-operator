@@ -1,0 +1,12 @@
+apiVersion: durarun.io/v1alpha1
+kind: AgentJob
+metadata:
+  name: hello-agent
+spec:
+  image: busybox:latest
+  command: ["sh", "-c", "echo 'Hello from DuraRun Agent' && sleep 5 && echo 'Done'"]
+  timeout: "2m"
+  resources:
+    cpuLimit: "500m"
+    memoryLimit: "256Mi"
+  maxRetries: 1

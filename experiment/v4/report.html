@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>durarun v4 Benchmark Report</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f0f13;color:#e4e4e7;padding:2rem;max-width:1200px;margin:0 auto}
+h1{font-size:1.8rem;color:#a78bfa;margin-bottom:.5rem}
+h2{font-size:1.3rem;color:#c4b5fd;margin:2rem 0 1rem;border-bottom:1px solid #27272a;padding-bottom:.5rem}
+.subtitle{color:#71717a;margin-bottom:2rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin:2rem 0}
+.card{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:1.5rem}
+.card h3{font-size:1rem;color:#a1a1aa;margin-bottom:1rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:.5rem .75rem;color:#71717a;border-bottom:1px solid #27272a;font-weight:500}
+td{padding:.5rem .75rem;border-bottom:1px solid #1e1e22}
+tr:hover td{background:#1e1e24}
+.verdict-table td:last-child{font-weight:700}
+.pass{color:#22c55e} .fail{color:#ef4444} .na{color:#9ca3af}
+svg text{font-family:inherit}
+.legend{display:flex;gap:1.5rem;flex-wrap:wrap;margin:.75rem 0}
+.legend-item{display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:#a1a1aa}
+.legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+</style>
+</head>
+<body>
+<h1>durarun v4 横向对比实验报告</h1>
+<p class="subtitle">Generated 2026-09-20 06:18 UTC · 144 runs · 0 errors</p>
+
+<div class="legend">
+  <span class="legend-item"><span class="legend-dot" style="background:#9ca3af"></span>Native</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>durarun</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#22c55e"></span>LangGraph</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>Temporal</span>
+</div>
+
+<div class="grid">
+<div class="card">
+<h3>S0 正常执行延迟</h3>
+<svg viewBox="0 0 440 220" xmlns="http://www.w3.org/2000/svg"><line x1="60" y1="190.0" x2="420" y2="190.0" stroke="#27272a" stroke-width="1"/>
+<text x="52" y="194.0" text-anchor="end" fill="#52525b" font-size="10">0</text>
+<line x1="60" y1="145.0" x2="420" y2="145.0" stroke="#27272a" stroke-width="1"/>
+<text x="52" y="149.0" text-anchor="end" fill="#52525b" font-size="10">6597</text>
+<line x1="60" y1="100.0" x2="420" y2="100.0" stroke="#27272a" stroke-width="1"/>
+<text x="52" y="104.0" text-anchor="end" fill="#52525b" font-size="10">13194</text>
+<line x1="60" y1="55.0" x2="420" y2="55.0" stroke="#27272a" stroke-width="1"/>
+<text x="52" y="59.0" text-anchor="end" fill="#52525b" font-size="10">19792</text>
+<line x1="60" y1="10.0" x2="420" y2="10.0" stroke="#27272a" stroke-width="1"/>
+<text x="52" y="14.0" text-anchor="end" fill="#52525b" font-size="10">26389</text>
+<rect x="78.0" y="38.5" width="54.0" height="151.5" fill="#9ca3af" rx="4"/>
+<text x="105.0" y="32.5" text-anchor="middle" fill="#a1a1aa" font-size="11">22212</text>
+<text x="105.0" y="208.0" text-anchor="middle" fill="#71717a" font-size="10">Native</text>
+<rect x="168.0" y="40.3" width="54.0" height="149.7" fill="#8b5cf6" rx="4"/>
+<text x="195.0" y="34.3" text-anchor="middle" fill="#a1a1aa" font-size="11">21944</text>
+<text x="195.0" y="208.0" text-anchor="middle" fill="#71717a" font-size="10">durarun</text>
+<rect x="258.0" y="40.9" width="54.0" height="149.1" fill="#22c55e" rx="4"/>
+<text x="285.0" y="34.9" text-anchor="middle" fill="#a1a1aa" font-size="11">21861</text>
+<text x="285.0" y="208.0" text-anchor="middle" fill="#71717a" font-size="10">LangGraph</text>
+<rect x="348.0" y="33.5" width="54.0" height="156.5" fill="#3b82f6" rx="4"/>
+<text x="375.0" y="27.5" text-anchor="middle" fill="#a1a1aa" font-size="11">22947</text>
+<text x="375.0" y="208.0" text-anchor="middle" fill="#71717a" font-size="10">Temporal</text>
+</svg>
+</div>
+<div class="card">
+<h3>五维雷达评分</h3>
+<svg viewBox="0 0 440 360" xmlns="http://www.w3.org/2000/svg"><polygon points="220.0,137.5 250.9,160.0 239.1,196.3 200.9,196.3 189.1,160.0" fill="none" stroke="#27272a" stroke-width="1"/>
+<polygon points="220.0,105.0 281.8,149.9 258.2,222.6 181.8,222.6 158.2,149.9" fill="none" stroke="#27272a" stroke-width="1"/>
+<polygon points="220.0,72.5 312.7,139.9 277.3,248.9 162.7,248.9 127.3,139.9" fill="none" stroke="#27272a" stroke-width="1"/>
+<polygon points="220.0,40.0 343.6,129.8 296.4,275.2 143.6,275.2 96.4,129.8" fill="none" stroke="#27272a" stroke-width="1"/>
+<line x1="220.0" y1="170.0" x2="220.0" y2="40.0" stroke="#27272a" stroke-width="1"/>
+<line x1="220.0" y1="170.0" x2="343.6" y2="129.8" stroke="#27272a" stroke-width="1"/>
+<line x1="220.0" y1="170.0" x2="296.4" y2="275.2" stroke="#27272a" stroke-width="1"/>
+<line x1="220.0" y1="170.0" x2="143.6" y2="275.2" stroke="#27272a" stroke-width="1"/>
+<line x1="220.0" y1="170.0" x2="96.4" y2="129.8" stroke="#27272a" stroke-width="1"/>
+<text x="220.0" y="16.6" text-anchor="middle" fill="#a1a1aa" font-size="11" dominant-baseline="central">执行开销</text>
+<text x="365.9" y="122.6" text-anchor="start" fill="#a1a1aa" font-size="11" dominant-baseline="central">恢复能力</text>
+<text x="310.2" y="294.1" text-anchor="start" fill="#a1a1aa" font-size="11" dominant-baseline="central">重试能力</text>
+<text x="129.8" y="294.1" text-anchor="end" fill="#a1a1aa" font-size="11" dominant-baseline="central">并发扩展</text>
+<text x="74.1" y="122.6" text-anchor="end" fill="#a1a1aa" font-size="11" dominant-baseline="central">接入成本</text>
+<polygon points="220.0,40.0 318.9,137.9 296.4,275.2 158.3,255.0 98.8,130.6" fill="#9ca3af" fill-opacity="0.15" stroke="#9ca3af" stroke-width="2"/>
+<circle cx="220.0" cy="40.0" r="3" fill="#9ca3af"/>
+<circle cx="318.9" cy="137.9" r="3" fill="#9ca3af"/>
+<circle cx="296.4" cy="275.2" r="3" fill="#9ca3af"/>
+<circle cx="158.3" cy="255.0" r="3" fill="#9ca3af"/>
+<circle cx="98.8" cy="130.6" r="3" fill="#9ca3af"/>
+<polygon points="220.0,40.0 318.9,137.9 296.4,275.2 167.0,243.0 106.3,133.0" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="2"/>
+<circle cx="220.0" cy="40.0" r="3" fill="#8b5cf6"/>
+<circle cx="318.9" cy="137.9" r="3" fill="#8b5cf6"/>
+<circle cx="296.4" cy="275.2" r="3" fill="#8b5cf6"/>
+<circle cx="167.0" cy="243.0" r="3" fill="#8b5cf6"/>
+<circle cx="106.3" cy="133.0" r="3" fill="#8b5cf6"/>
+<polygon points="220.0,40.0 318.9,137.9 296.4,275.2 143.9,274.8 133.5,141.9" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="2"/>
+<circle cx="220.0" cy="40.0" r="3" fill="#22c55e"/>
+<circle cx="318.9" cy="137.9" r="3" fill="#22c55e"/>
+<circle cx="296.4" cy="275.2" r="3" fill="#22c55e"/>
+<circle cx="143.9" cy="274.8" r="3" fill="#22c55e"/>
+<circle cx="133.5" cy="141.9" r="3" fill="#22c55e"/>
+<polygon points="220.0,61.5 257.1,157.9 296.4,275.2 144.1,274.4 181.7,157.5" fill="#3b82f6" fill-opacity="0.15" stroke="#3b82f6" stroke-width="2"/>
+<circle cx="220.0" cy="61.5" r="3" fill="#3b82f6"/>
+<circle cx="257.1" cy="157.9" r="3" fill="#3b82f6"/>
+<circle cx="296.4" cy="275.2" r="3" fill="#3b82f6"/>
+<circle cx="144.1" cy="274.4" r="3" fill="#3b82f6"/>
+<circle cx="181.7" cy="157.5" r="3" fill="#3b82f6"/>
+<rect x="40" y="334" width="10" height="10" rx="2" fill="#9ca3af"/><text x="54" y="343" fill="#a1a1aa" font-size="10">Native</text><rect x="112" y="334" width="10" height="10" rx="2" fill="#8b5cf6"/><text x="126" y="343" fill="#a1a1aa" font-size="10">durarun</text><rect x="191" y="334" width="10" height="10" rx="2" fill="#22c55e"/><text x="205" y="343" fill="#a1a1aa" font-size="10">LangGraph</text><rect x="284" y="334" width="10" height="10" rx="2" fill="#3b82f6"/><text x="298" y="343" fill="#a1a1aa" font-size="10">Temporal</text></svg>
+</div>
+</div>
+
+<h2>S0 详细数据</h2>
+<table>
+<tr><th>平台</th><th>Avg (ms)</th><th>Min</th><th>Max</th><th>Stddev</th><th>N</th><th>vs Native</th></tr>
+<tr><td style="border-left:4px solid #9ca3af">Native</td><td>22212.4</td><td>19677.7</td><td>24960.8</td><td>1809.8</td><td>9</td><td>基线</td></tr>
+<tr><td style="border-left:4px solid #8b5cf6">durarun</td><td>21943.7</td><td>19143.1</td><td>23999.1</td><td>1510.0</td><td>9</td><td>+-1.2%</td></tr>
+<tr><td style="border-left:4px solid #22c55e">LangGraph</td><td>21861.3</td><td>19402.9</td><td>24713.7</td><td>1895.2</td><td>9</td><td>+-1.6%</td></tr>
+<tr><td style="border-left:4px solid #3b82f6">Temporal</td><td>22946.8</td><td>19239.7</td><td>26180.6</td><td>2417.9</td><td>9</td><td>+3.3%</td></tr>
+
+</table>
+
+<h2>验收裁决 (durarun)</h2>
+<table class="verdict-table">
+<tr><th>ID</th><th>指标</th><th>阈值</th><th>实际值</th><th>结果</th></tr>
+<tr><td>B-1</td><td>S0 overhead vs Native</td><td>≤ +10%</td><td>+-1.2%</td><td style="color:#22c55e;font-weight:700">PASS</td></tr>
+<tr><td>B-2</td><td>S1 恢复耗时 vs S0 全量</td><td>≤ 50%</td><td>42.3%</td><td style="color:#22c55e;font-weight:700">PASS</td></tr>
+<tr><td>B-3</td><td>S1 跳步率</td><td>≥ 60%</td><td>60%</td><td style="color:#22c55e;font-weight:700">PASS</td></tr>
+<tr><td>B-4</td><td>S2 自动重试成功率</td><td>100%</td><td>100%</td><td style="color:#22c55e;font-weight:700">PASS</td></tr>
+<tr><td>B-5</td><td>S3 并发 overhead vs S0</td><td>≤ +15%</td><td>+10.2%</td><td style="color:#22c55e;font-weight:700">PASS</td></tr>
+<tr><td>B-6</td><td>S4 OTEL 性能退化</td><td>≤ 2%</td><td>+1.00%</td><td style="color:#22c55e;font-weight:700">PASS</td></tr>
+<tr><td>B-7</td><td>S5 接入 LOC</td><td>≤ 20</td><td>15</td><td style="color:#22c55e;font-weight:700">PASS</td></tr>
+<tr><td>B-8</td><td>S5 依赖包数</td><td>≤ 10</td><td>4</td><td style="color:#22c55e;font-weight:700">PASS</td></tr>
+
+</table>
+
+</body>
+</html>

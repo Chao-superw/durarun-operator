@@ -1,0 +1,49 @@
+[
+  {
+    "metric_id": "P4-S3",
+    "description": "3-goroutine concurrent overhead vs native",
+    "target": "\u003c=+10%",
+    "trials": [
+      {
+        "avg_ms": 734.6666666666666,
+        "native_ms": 700,
+        "overhead%": 4.952380952380947,
+        "trial": 1
+      },
+      {
+        "avg_ms": 731.6666666666666,
+        "native_ms": 700,
+        "overhead%": 4.523809523809518,
+        "trial": 2
+      },
+      {
+        "avg_ms": 734.6666666666666,
+        "native_ms": 700,
+        "overhead%": 4.952380952380947,
+        "trial": 3
+      },
+      {
+        "avg_ms": 736,
+        "native_ms": 700,
+        "overhead%": 5.142857142857142,
+        "trial": 4
+      },
+      {
+        "avg_ms": 735,
+        "native_ms": 700,
+        "overhead%": 5,
+        "trial": 5
+      }
+    ],
+    "mean": 4.914285714285711,
+    "stddev": 0.20734801006740386,
+    "pass": true,
+    "timestamp": "2026-09-23T04:55:55Z",
+    "environment": {
+      "arch": "arm64",
+      "cpus": "18",
+      "go": "go1.26.4",
+      "os": "darwin"
+    }
+  }
+]

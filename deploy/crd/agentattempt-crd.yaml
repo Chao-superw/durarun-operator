@@ -1,0 +1,108 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentattempts.durarun.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: durarun.io
+  names:
+    kind: AgentAttempt
+    listKind: AgentAttemptList
+    plural: agentattempts
+    singular: agentattempt
+    shortNames:
+      - aat
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: JobRef
+          type: string
+          jsonPath: .spec.jobRef
+        - name: Number
+          type: integer
+          jsonPath: .spec.number
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: PodName
+          type: string
+          jsonPath: .status.podName
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: AgentAttempt is the Schema for the agentattempts API
+          type: object
+          required:
+            - spec
+          properties:
+            apiVersion:
+              description: >-
+                APIVersion defines the versioned schema of this representation
+                of an object.
+              type: string
+            kind:
+              description: >-
+                Kind is a string value representing the REST resource this
+                object represents.
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: AgentAttemptSpec defines the desired state of AgentAttempt
+              type: object
+              required:
+                - jobRef
+                - number
+              properties:
+                jobRef:
+                  description: Name of the parent AgentJob this attempt belongs to.
+                  type: string
+                number:
+                  description: Attempt number (1-based).
+                  type: integer
+                  format: int32
+                  minimum: 1
+            status:
+              description: AgentAttemptStatus defines the observed state of AgentAttempt
+              type: object
+              properties:
+                phase:
+                  description: Current phase of this attempt.
+                  type: string
+                  enum:
+                    - Pending
+                    - Running
+                    - Succeeded
+                    - Failed
+                podName:
+                  description: Name of the Pod running this attempt.
+                  type: string
+                podUID:
+                  description: UID of the Pod running this attempt.
+                  type: string
+                exitCode:
+                  description: Exit code of the main container, if completed.
+                  type: integer
+                  format: int32
+                startTime:
+                  description: Time when this attempt started.
+                  type: string
+                  format: date-time
+                completionTime:
+                  description: Time when this attempt completed.
+                  type: string
+                  format: date-time
+                message:
+                  description: Human-readable message with details about the attempt.
+                  type: string
+                reason:
+                  description: Machine-readable reason for the current phase.
+                  type: string

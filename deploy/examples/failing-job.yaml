@@ -1,0 +1,12 @@
+apiVersion: durarun.io/v1alpha1
+kind: AgentJob
+metadata:
+  name: failing-agent
+spec:
+  image: busybox:latest
+  command: ["sh", "-c", "echo 'Starting failing job...' && sleep 2 && echo 'About to fail' && exit 1"]
+  timeout: "2m"
+  resources:
+    cpuLimit: "250m"
+    memoryLimit: "128Mi"
+  maxRetries: 3

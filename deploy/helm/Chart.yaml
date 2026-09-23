@@ -1,0 +1,14 @@
+apiVersion: v2
+name: durarun-operator
+description: DuraRun Operator - Kubernetes operator for durable AI agent workloads
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - agent
+  - sandbox
+  - kubernetes
+  - operator
+  - durarun
+maintainers:
+  - name: DuraRun Team

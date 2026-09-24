@@ -5,14 +5,14 @@
     "target": "\u003c=+2%",
     "trials": [
       {
-        "noop_ms": 727,
-        "overhead%": 0.2751031636863824,
-        "stdout_ms": 729,
+        "noop_ms": 729,
+        "overhead%": 0.411522633744856,
+        "stdout_ms": 732,
         "trial": 1
       },
       {
-        "noop_ms": 728,
-        "overhead%": 0.13736263736263737,
+        "noop_ms": 730,
+        "overhead%": -0.136986301369863,
         "stdout_ms": 729,
         "trial": 2
       },
@@ -23,22 +23,22 @@
         "trial": 3
       },
       {
-        "noop_ms": 727,
-        "overhead%": 0.5502063273727648,
-        "stdout_ms": 731,
+        "noop_ms": 729,
+        "overhead%": -0.1371742112482853,
+        "stdout_ms": 728,
         "trial": 4
       },
       {
-        "noop_ms": 729,
-        "overhead%": -0.2743484224965706,
-        "stdout_ms": 727,
+        "noop_ms": 730,
+        "overhead%": -0.136986301369863,
+        "stdout_ms": 729,
         "trial": 5
       }
     ],
-    "mean": 0.11022989893538573,
-    "stddev": 0.29346479024098315,
+    "mean": -0.027359678298288125,
+    "stddev": 0.21944117211250128,
     "pass": true,
-    "timestamp": "2026-09-23T04:56:04Z",
+    "timestamp": "2026-09-23T10:58:53Z",
     "environment": {
       "arch": "arm64",
       "cpus": "18",

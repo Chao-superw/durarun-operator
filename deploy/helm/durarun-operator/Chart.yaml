@@ -1,0 +1,5 @@
+apiVersion: v2
+name: durarun-operator
+description: Kubernetes operator for durable agent job execution
+version: 0.1.0
+appVersion: "0.1.0"

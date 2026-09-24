@@ -1,10 +1,17 @@
 package v1alpha1
 
 import (
-	"fmt"
-
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+)
+
+// Condition type constants for AgentJob.
+const (
+	JobConditionScheduled = "Scheduled"
+	JobConditionRunning   = "Running"
+	JobConditionComplete  = "Complete"
+	JobConditionFailed    = "Failed"
 )
 
 // AgentJob is the Schema for the agentjobs API.
@@ -18,92 +25,52 @@ type AgentJob struct {
 
 // AgentJobSpec defines the desired state of an AgentJob.
 type AgentJobSpec struct {
-	Image        string            `json:"image"`
-	Command      []string          `json:"command,omitempty"`
-	Prompt       string            `json:"prompt,omitempty"`
-	Timeout      string            `json:"timeout,omitempty"`
-	Resources    ResourceSpec      `json:"resources,omitempty"`
-	Env          map[string]string `json:"env,omitempty"`
-	MaxRetries   int               `json:"maxRetries,omitempty"`
-	Isolation    IsolationSpec     `json:"isolation,omitempty"`
-	PoolRef      string            `json:"poolRef,omitempty"`
-	StepTracking StepTrackingSpec  `json:"stepTracking,omitempty"`
-	Checkpoint   CheckpointSpec    `json:"checkpoint,omitempty"`
+	Runtime    RuntimeSpec      `json:"runtime"`
+	Execution  ExecutionSpec    `json:"execution"`
+	Checkpoint CheckpointPolicy `json:"checkpoint,omitempty"`
 }
 
-// ResourceSpec defines compute resource constraints.
-type ResourceSpec struct {
-	CPULimit    string `json:"cpuLimit,omitempty"`
-	MemoryLimit string `json:"memoryLimit,omitempty"`
+// RuntimeSpec defines the container runtime configuration.
+type RuntimeSpec struct {
+	Image     string                      `json:"image"`
+	Command   []string                    `json:"command,omitempty"`
+	Args      []string                    `json:"args,omitempty"`
+	Env       []corev1.EnvVar             `json:"env,omitempty"`
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
-// IsolationLevel describes the sandbox isolation tier.
-type IsolationLevel string
-
-const (
-	L0Process     IsolationLevel = "L0Process"
-	L1GVisor      IsolationLevel = "L1GVisor"
-	L2Firecracker IsolationLevel = "L2Firecracker"
-	L3Docker      IsolationLevel = "L3Docker"
-)
-
-// IsolationSpec configures sandbox isolation for the job.
-type IsolationSpec struct {
-	Level IsolationLevel `json:"level,omitempty"`
+// ExecutionSpec defines execution parameters for the job.
+type ExecutionSpec struct {
+	Timeout                 *metav1.Duration `json:"timeout,omitempty"`
+	MaxAttempts             int32            `json:"maxAttempts,omitempty"`
+	BackoffLimit            *metav1.Duration `json:"backoffLimit,omitempty"`
+	ActiveDeadlineSeconds   *int64           `json:"activeDeadlineSeconds,omitempty"`
+	TTLSecondsAfterFinished *int32           `json:"ttlSecondsAfterFinished,omitempty"`
 }
 
-// StepTrackingProtocol defines how step progress is reported.
-type StepTrackingProtocol string
-
-const (
-	ProtocolEnv     StepTrackingProtocol = "env"
-	ProtocolHook    StepTrackingProtocol = "hook"
-	ProtocolAdapter StepTrackingProtocol = "adapter"
-)
-
-// StepTrackingSpec configures step-level progress tracking.
-type StepTrackingSpec struct {
-	Enabled  bool                 `json:"enabled,omitempty"`
-	Protocol StepTrackingProtocol `json:"protocol,omitempty"`
-}
-
-// CheckpointSpec configures checkpoint persistence.
-type CheckpointSpec struct {
+// CheckpointPolicy configures checkpoint persistence.
+type CheckpointPolicy struct {
 	Enabled         bool   `json:"enabled,omitempty"`
-	Bucket          string `json:"bucket,omitempty"`
-	Endpoint        string `json:"endpoint,omitempty"`
-	IntervalSeconds int    `json:"intervalSeconds,omitempty"`
+	IntervalSeconds int32  `json:"intervalSeconds,omitempty"`
+	StorageRef      string `json:"storageRef,omitempty"`
 }
-
-// JobPhase represents the overall lifecycle phase of an AgentJob.
-type JobPhase string
-
-const (
-	JobPhasePending    JobPhase = "Pending"
-	JobPhaseScheduling JobPhase = "Scheduling"
-	JobPhaseRunning    JobPhase = "Running"
-	JobPhaseRecovering JobPhase = "Recovering"
-	JobPhaseSucceeded  JobPhase = "Succeeded"
-	JobPhaseFailed     JobPhase = "Failed"
-	JobPhaseTerminated JobPhase = "Terminated"
-)
 
 // AttemptReference points to a specific AgentAttempt.
 type AttemptReference struct {
-	Name   string    `json:"name"`
-	Number int       `json:"number"`
-	UID    types.UID `json:"uid,omitempty"`
+	Name    string    `json:"name"`
+	Ordinal int32     `json:"ordinal"`
+	UID     types.UID `json:"uid,omitempty"`
 }
 
 // AgentJobStatus defines the observed state of an AgentJob.
 type AgentJobStatus struct {
-	Phase             JobPhase           `json:"phase,omitempty"`
-	ActiveAttempt     *AttemptReference  `json:"activeAttempt,omitempty"`
-	CompletedAttempts int                `json:"completedAttempts"`
-	FailedAttempts    int                `json:"failedAttempts"`
 	Conditions        []metav1.Condition `json:"conditions,omitempty"`
+	ActiveAttempt     *AttemptReference  `json:"activeAttempt,omitempty"`
+	CompletedAttempts int32              `json:"completedAttempts"`
+	FailedAttempts    int32              `json:"failedAttempts"`
 	StartTime         *metav1.Time       `json:"startTime,omitempty"`
 	CompletionTime    *metav1.Time       `json:"completionTime,omitempty"`
+	SpecHash          string             `json:"specHash,omitempty"`
 }
 
 // AgentJobList contains a list of AgentJob.
@@ -113,34 +80,32 @@ type AgentJobList struct {
 	Items           []AgentJob `json:"items"`
 }
 
-// ValidateJobSpec validates an AgentJobSpec and applies defaults where needed.
-func ValidateJobSpec(spec *AgentJobSpec) error {
-	if spec.Image == "" {
-		return fmt.Errorf("image is required")
+// JobPhaseFromConditions derives a human-readable phase string from conditions.
+// Terminal conditions (Complete, Failed) take priority over non-terminal ones.
+func JobPhaseFromConditions(conditions []metav1.Condition) string {
+	for _, c := range conditions {
+		if c.Status != metav1.ConditionTrue {
+			continue
+		}
+		switch c.Type {
+		case JobConditionComplete:
+			return "Succeeded"
+		case JobConditionFailed:
+			return "Failed"
+		}
 	}
-	if spec.MaxRetries < 0 {
-		spec.MaxRetries = 0
+	for _, c := range conditions {
+		if c.Status != metav1.ConditionTrue {
+			continue
+		}
+		switch c.Type {
+		case JobConditionRunning:
+			return "Running"
+		case JobConditionScheduled:
+			return "Scheduling"
+		}
 	}
-	if spec.Timeout == "" {
-		spec.Timeout = "5m"
-	}
-	if spec.Resources.CPULimit == "" {
-		spec.Resources.CPULimit = "1"
-	}
-	if spec.Resources.MemoryLimit == "" {
-		spec.Resources.MemoryLimit = "512m"
-	}
-	if spec.Isolation.Level == "" {
-		spec.Isolation.Level = L1GVisor
-	}
-	if spec.StepTracking.Protocol == "" {
-		spec.StepTracking.Enabled = true
-		spec.StepTracking.Protocol = ProtocolEnv
-	}
-	if spec.PoolRef == "" {
-		spec.PoolRef = "default"
-	}
-	return nil
+	return "Pending"
 }
 
 func init() {

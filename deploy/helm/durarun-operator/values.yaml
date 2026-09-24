@@ -1,0 +1,30 @@
+operator:
+  image: durarun-operator:latest
+  replicas: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+runner:
+  image: durarun-runner:latest
+
+gateway:
+  enabled: true
+  image: durarun-gateway:latest
+  replicas: 1
+  service:
+    port: 8080
+
+artifact:
+  storage: memory
+  s3:
+    endpoint: ""
+    bucket: durarun-artifacts
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name: durarun-operator

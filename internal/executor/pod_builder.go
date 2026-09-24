@@ -3,22 +3,35 @@ package executor
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"durarun-operator/api/v1alpha1"
 )
 
 // BuildPod constructs a corev1.Pod from an AgentJob and its AgentAttempt.
+// runnerImage specifies the image that contains the /agent-runner binary.
 // The returned Pod is not yet created; the caller must set OwnerReferences
 // and submit it to the API server.
-func BuildPod(job *v1alpha1.AgentJob, attempt *v1alpha1.AgentAttempt) *corev1.Pod {
-	podName := fmt.Sprintf("%s-%d", job.Name, attempt.Spec.Number)
+func BuildPod(job *v1alpha1.AgentJob, attempt *v1alpha1.AgentAttempt, opts ...PodBuildOption) *corev1.Pod {
+	cfg := defaultPodBuildConfig()
+	for _, o := range opts {
+		o(&cfg)
+	}
 
-	podSecCtx, containerSecCtx := BuildSecurityContext(job.Spec.Isolation.Level)
+	podName := fmt.Sprintf("%s-%d", job.Name, attempt.Spec.Ordinal)
+
+	podSecCtx, containerSecCtx := BuildSecurityContext("")
+
+	// Build the main container command: runner as PID 1, then user command/args.
+	mainCommand := []string{"/tools/agent-runner"}
+	var mainArgs []string
+	mainArgs = append(mainArgs, "--")
+	mainArgs = append(mainArgs, job.Spec.Runtime.Command...)
+	if len(job.Spec.Runtime.Args) > 0 {
+		mainArgs = append(mainArgs, job.Spec.Runtime.Args...)
+	}
 
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -31,17 +44,29 @@ func BuildPod(job *v1alpha1.AgentJob, attempt *v1alpha1.AgentAttempt) *corev1.Po
 		},
 		Spec: corev1.PodSpec{
 			RestartPolicy: corev1.RestartPolicyNever,
+			InitContainers: []corev1.Container{
+				{
+					Name:    "inject-runner",
+					Image:   cfg.RunnerImage,
+					Command: []string{"cp", "/agent-runner", "/tools/agent-runner"},
+					VolumeMounts: []corev1.VolumeMount{
+						{Name: "tools", MountPath: "/tools"},
+					},
+				},
+			},
 			Containers: []corev1.Container{
 				{
 					Name:            "agent",
-					Image:           job.Spec.Image,
-					Command:         job.Spec.Command,
+					Image:           job.Spec.Runtime.Image,
+					Command:         mainCommand,
+					Args:            mainArgs,
 					Env:             buildEnvVars(job, attempt),
-					Resources:       buildResources(job.Spec.Resources),
+					Resources:       job.Spec.Runtime.Resources,
 					SecurityContext: containerSecCtx,
 					VolumeMounts: []corev1.VolumeMount{
 						{Name: "workspace", MountPath: "/workspace"},
 						{Name: "tmp", MountPath: "/tmp"},
+						{Name: "tools", MountPath: "/tools", ReadOnly: true},
 					},
 				},
 			},
@@ -60,216 +85,96 @@ func BuildPod(job *v1alpha1.AgentJob, attempt *v1alpha1.AgentAttempt) *corev1.Po
 						},
 					},
 				},
+				{
+					Name: "tools",
+					VolumeSource: corev1.VolumeSource{
+						EmptyDir: &corev1.EmptyDirVolumeSource{},
+					},
+				},
 			},
-			SecurityContext:               podSecCtx,
+			SecurityContext:              podSecCtx,
 			AutomountServiceAccountToken: boolPtr(false),
 		},
 	}
 
-	// Set RuntimeClassName based on isolation level.
-	if rc := runtimeClassForLevel(job.Spec.Isolation.Level); rc != "" {
-		pod.Spec.RuntimeClassName = &rc
-	}
-
-	// Checkpoint support
-	if job.Spec.Checkpoint.Enabled {
-		// Wrap the agent command so the main container writes an exit marker when it finishes.
-		if len(job.Spec.Command) > 0 {
-			cmd := job.Spec.Command
-			if len(cmd) >= 3 && (cmd[0] == "sh" || cmd[0] == "/bin/sh" || cmd[0] == "bash" || cmd[0] == "/bin/bash") && cmd[1] == "-c" {
-				cmd[len(cmd)-1] = cmd[len(cmd)-1] + "; echo $? > /workspace/.exit-code"
-				pod.Spec.Containers[0].Command = cmd
-			} else {
-				original := strings.Join(cmd, " ")
-				pod.Spec.Containers[0].Command = []string{"sh", "-c", original + "; echo $? > /workspace/.exit-code"}
-			}
-		}
-
-		// Add volumes for checkpoints and agent-runner binary.
-		pod.Spec.Volumes = append(pod.Spec.Volumes,
-			corev1.Volume{
-				Name: "checkpoints",
-				VolumeSource: corev1.VolumeSource{
-					HostPath: &corev1.HostPathVolumeSource{
-						Path: "/tmp/durarun-checkpoints",
-						Type: hostPathTypePtr(corev1.HostPathDirectoryOrCreate),
-					},
+	// If an attempt secret name is provided, mount the token volume.
+	if cfg.AttemptSecretName != "" {
+		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
+			Name: "durarun-token",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: cfg.AttemptSecretName,
 				},
 			},
-			corev1.Volume{
-				Name: "agent-runner-bin",
-				VolumeSource: corev1.VolumeSource{
-					HostPath: &corev1.HostPathVolumeSource{
-						Path: "/home/wangchaoyu.v2/durarun-operator/bin",
-						Type: hostPathTypePtr(corev1.HostPathDirectory),
-					},
-				},
+		})
+		pod.Spec.Containers[0].VolumeMounts = append(pod.Spec.Containers[0].VolumeMounts,
+			corev1.VolumeMount{
+				Name:      "durarun-token",
+				MountPath: "/var/run/durarun",
+				ReadOnly:  true,
 			},
 		)
-
-		// Add initContainer to restore checkpoint before the agent starts.
-		pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
-			Name:    "restore-checkpoint",
-			Image:   "busybox:latest",
-			Command: []string{"/tools/agent-runner"},
-			Args: []string{
-				"--mode=restore",
-				"--work-dir=/workspace",
-				"--checkpoint-dir=/checkpoints",
-				fmt.Sprintf("--job-name=%s", job.Name),
-			},
-			VolumeMounts: []corev1.VolumeMount{
-				{Name: "workspace", MountPath: "/workspace"},
-				{Name: "checkpoints", MountPath: "/checkpoints"},
-				{Name: "agent-runner-bin", MountPath: "/tools"},
-			},
-		})
-
-		// Add sidecar container for periodic checkpointing.
-		interval := 30
-		if job.Spec.Checkpoint.IntervalSeconds > 0 {
-			interval = job.Spec.Checkpoint.IntervalSeconds
-		}
-		pod.Spec.Containers = append(pod.Spec.Containers, corev1.Container{
-			Name:    "runner-sidecar",
-			Image:   "busybox:latest",
-			Command: []string{"/tools/agent-runner"},
-			Args: []string{
-				"--mode=sidecar",
-				"--work-dir=/workspace",
-				"--checkpoint-dir=/checkpoints",
-				fmt.Sprintf("--job-name=%s", job.Name),
-				fmt.Sprintf("--attempt-number=%d", attempt.Spec.Number),
-				fmt.Sprintf("--checkpoint-interval=%d", interval),
-			},
-			VolumeMounts: []corev1.VolumeMount{
-				{Name: "workspace", MountPath: "/workspace"},
-				{Name: "checkpoints", MountPath: "/checkpoints"},
-				{Name: "agent-runner-bin", MountPath: "/tools"},
-			},
-		})
 	}
 
 	return pod
 }
 
+// PodBuildConfig holds optional configuration for BuildPod.
+type PodBuildConfig struct {
+	RunnerImage       string
+	AttemptSecretName string
+}
+
+// PodBuildOption is a functional option for BuildPod.
+type PodBuildOption func(*PodBuildConfig)
+
+func defaultPodBuildConfig() PodBuildConfig {
+	return PodBuildConfig{
+		RunnerImage: "durarun-runner:latest",
+	}
+}
+
+// WithRunnerImage sets the runner image used by the init container.
+func WithRunnerImage(image string) PodBuildOption {
+	return func(c *PodBuildConfig) {
+		if image != "" {
+			c.RunnerImage = image
+		}
+	}
+}
+
+// WithAttemptSecret sets the secret name to mount as the attempt token.
+func WithAttemptSecret(name string) PodBuildOption {
+	return func(c *PodBuildConfig) {
+		c.AttemptSecretName = name
+	}
+}
+
 // buildEnvVars produces the environment variable list for the agent container.
-// It includes user-supplied env vars from job.Spec.Env plus standard vars.
+// It includes standard vars plus user-supplied env vars from runtime spec.
 func buildEnvVars(job *v1alpha1.AgentJob, attempt *v1alpha1.AgentAttempt) []corev1.EnvVar {
 	var envs []corev1.EnvVar
 
-	// Standard variables.
-	envs = append(envs, corev1.EnvVar{Name: "AGENT_PROMPT", Value: job.Spec.Prompt})
-	envs = append(envs, corev1.EnvVar{Name: "AF_JOB_NAME", Value: job.Name})
-	envs = append(envs, corev1.EnvVar{Name: "AF_ATTEMPT_NUMBER", Value: strconv.Itoa(attempt.Spec.Number)})
+	// Standard DURARUN variables.
+	envs = append(envs,
+		corev1.EnvVar{Name: "DURARUN_JOB_NAME", Value: job.Name},
+		corev1.EnvVar{Name: "DURARUN_JOB_UID", Value: string(job.UID)},
+		corev1.EnvVar{Name: "DURARUN_ATTEMPT_ORDINAL", Value: strconv.FormatInt(int64(attempt.Spec.Ordinal), 10)},
+		corev1.EnvVar{Name: "DURARUN_ATTEMPT_UID", Value: string(attempt.UID)},
+	)
 
-	// User-supplied variables.
-	for k, v := range job.Spec.Env {
-		envs = append(envs, corev1.EnvVar{Name: k, Value: v})
-	}
+	// Legacy aliases for backward compatibility.
+	envs = append(envs,
+		corev1.EnvVar{Name: "AF_JOB_NAME", Value: job.Name},
+		corev1.EnvVar{Name: "AF_ATTEMPT_NUMBER", Value: strconv.FormatInt(int64(attempt.Spec.Ordinal), 10)},
+	)
+
+	// User-supplied variables from runtime spec.
+	envs = append(envs, job.Spec.Runtime.Env...)
 
 	return envs
 }
 
-// buildResources converts a v1alpha1.ResourceSpec into Kubernetes
-// ResourceRequirements.  It sets both requests and limits to the same value
-// to guarantee QoS class "Guaranteed".
-func buildResources(spec v1alpha1.ResourceSpec) corev1.ResourceRequirements {
-	reqs := corev1.ResourceRequirements{
-		Requests: corev1.ResourceList{},
-		Limits:   corev1.ResourceList{},
-	}
-
-	if spec.CPULimit != "" {
-		q := parseCPUQuantity(spec.CPULimit)
-		reqs.Requests[corev1.ResourceCPU] = q
-		reqs.Limits[corev1.ResourceCPU] = q
-	}
-
-	if spec.MemoryLimit != "" {
-		q := parseMemoryQuantity(spec.MemoryLimit)
-		reqs.Requests[corev1.ResourceMemory] = q
-		reqs.Limits[corev1.ResourceMemory] = q
-	}
-
-	return reqs
-}
-
-// parseCPUQuantity converts a CPU string (e.g. "1", "0.5", "500m") into a
-// resource.Quantity.
-func parseCPUQuantity(s string) resource.Quantity {
-	s = strings.TrimSpace(s)
-	// If the string already has a suffix recognized by resource.Quantity, use it directly.
-	if strings.HasSuffix(s, "m") {
-		q, err := resource.ParseQuantity(s)
-		if err == nil {
-			return q
-		}
-	}
-	// Plain number: interpret as whole or fractional cores.
-	q, err := resource.ParseQuantity(s)
-	if err != nil {
-		// Fallback to zero.
-		return resource.MustParse("0")
-	}
-	return q
-}
-
-// parseMemoryQuantity converts a memory string (e.g. "512m", "1g", "256Mi")
-// into a resource.Quantity.  It handles the project's legacy lowercase
-// suffixes (m=MiB, g=GiB, k=KiB) as well as standard K8s suffixes.
-//
-// Legacy lowercase suffixes are checked FIRST because K8s resource.ParseQuantity
-// treats "m" as "milli" (10^-3) which is not what we want for memory.
-func parseMemoryQuantity(s string) resource.Quantity {
-	s = strings.TrimSpace(s)
-
-	// Check for legacy single-char lowercase suffixes first.
-	// These come from the project's Docker-era conventions where
-	// "m" = MiB, "g" = GiB, "k" = KiB.
-	if len(s) > 1 {
-		suffix := s[len(s)-1]
-		numPart := s[:len(s)-1]
-		switch suffix {
-		case 'm':
-			n, _ := strconv.ParseFloat(numPart, 64)
-			return *resource.NewQuantity(int64(n*1024*1024), resource.BinarySI)
-		case 'g':
-			n, _ := strconv.ParseFloat(numPart, 64)
-			return *resource.NewQuantity(int64(n*1024*1024*1024), resource.BinarySI)
-		case 'k':
-			n, _ := strconv.ParseFloat(numPart, 64)
-			return *resource.NewQuantity(int64(n*1024), resource.BinarySI)
-		}
-	}
-
-	// Try standard K8s format (e.g., "512Mi", "1Gi", "1000").
-	if q, err := resource.ParseQuantity(s); err == nil {
-		return q
-	}
-
-	// Fallback: treat as raw bytes.
-	n, _ := strconv.ParseInt(s, 10, 64)
-	return *resource.NewQuantity(n, resource.BinarySI)
-}
-
-// runtimeClassForLevel returns the RuntimeClassName to use for the given
-// isolation level, or "" if no special runtime is needed.
-func runtimeClassForLevel(level v1alpha1.IsolationLevel) string {
-	switch level {
-	case v1alpha1.L1GVisor:
-		return "runsc"
-	case v1alpha1.L2Firecracker:
-		return "firecracker-containerd"
-	default:
-		return ""
-	}
-}
-
 func boolPtr(b bool) *bool {
 	return &b
-}
-
-func hostPathTypePtr(t corev1.HostPathType) *corev1.HostPathType {
-	return &t
 }

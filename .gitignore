@@ -1,0 +1,24 @@
+# Build artifacts
+bin/
+_output/
+artifacts/
+agentctl
+*.exe
+*.test
+
+# Dependency vendoring
+vendor/
+
+# Test coverage
+cover.out
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

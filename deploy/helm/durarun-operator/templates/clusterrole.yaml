@@ -1,0 +1,132 @@
+{{- if .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-operator
+  labels:
+    app.kubernetes.io/name: durarun-operator
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: durarun
+rules:
+  # AgentJobs - full access
+  - apiGroups:
+      - durarun.io
+    resources:
+      - agentjobs
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - durarun.io
+    resources:
+      - agentjobs/status
+    verbs:
+      - get
+      - update
+      - patch
+  # AgentAttempts - full access
+  - apiGroups:
+      - durarun.io
+    resources:
+      - agentattempts
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - durarun.io
+    resources:
+      - agentattempts/status
+    verbs:
+      - get
+      - update
+      - patch
+  # SandboxPools - full access
+  - apiGroups:
+      - durarun.io
+    resources:
+      - sandboxpools
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - durarun.io
+    resources:
+      - sandboxpools/status
+    verbs:
+      - get
+      - update
+      - patch
+  # Pods - manage sandbox pods
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+  # Secrets - manage attempt tokens
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - create
+      - delete
+  # Events - emit Kubernetes events
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  # NetworkPolicies - sandbox isolation
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - networkpolicies
+    verbs:
+      - get
+      - list
+      - create
+      - update
+      - delete
+  # Leases - leader election
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - create
+      - update
+  # ConfigMaps - read configuration
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+{{- end }}

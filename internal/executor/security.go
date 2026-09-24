@@ -8,6 +8,8 @@ import (
 
 // BuildSecurityContext returns PodSecurityContext and container-level
 // SecurityContext appropriate for the requested isolation level.
+// The default context enforces a strict sandbox posture: non-root (UID 65534),
+// read-only root filesystem, RuntimeDefault seccomp, no capabilities.
 func BuildSecurityContext(level v1alpha1.IsolationLevel) (*corev1.PodSecurityContext, *corev1.SecurityContext) {
 	switch level {
 	case v1alpha1.L1GVisor:
@@ -15,14 +17,14 @@ func BuildSecurityContext(level v1alpha1.IsolationLevel) (*corev1.PodSecurityCon
 	case v1alpha1.L2Firecracker:
 		return firecrackerSecurityContext()
 	default:
-		// L0Process, L3Docker, or unset: minimal hardening.
+		// L0Process, L3Docker, or unset: strict sandbox hardening.
 		return defaultSecurityContext()
 	}
 }
 
-// defaultSecurityContext provides a baseline security posture.
+// defaultSecurityContext provides a strict baseline security posture.
 func defaultSecurityContext() (*corev1.PodSecurityContext, *corev1.SecurityContext) {
-	uid := int64(1000)
+	uid := int64(65534) // nobody
 	return &corev1.PodSecurityContext{
 			RunAsNonRoot: boolPtr(true),
 			RunAsUser:    &uid,
@@ -32,12 +34,15 @@ func defaultSecurityContext() (*corev1.PodSecurityContext, *corev1.SecurityConte
 			Capabilities: &corev1.Capabilities{
 				Drop: []corev1.Capability{"ALL"},
 			},
+			SeccompProfile: &corev1.SeccompProfile{
+				Type: corev1.SeccompProfileTypeRuntimeDefault,
+			},
 		}
 }
 
 // gvisorSecurityContext configures security for gVisor (runsc) runtime.
 func gvisorSecurityContext() (*corev1.PodSecurityContext, *corev1.SecurityContext) {
-	uid := int64(1000)
+	uid := int64(65534)
 	return &corev1.PodSecurityContext{
 			RunAsNonRoot: boolPtr(true),
 			RunAsUser:    &uid,
@@ -48,13 +53,15 @@ func gvisorSecurityContext() (*corev1.PodSecurityContext, *corev1.SecurityContex
 				Drop: []corev1.Capability{"ALL"},
 				Add:  []corev1.Capability{"NET_BIND_SERVICE"},
 			},
+			SeccompProfile: &corev1.SeccompProfile{
+				Type: corev1.SeccompProfileTypeRuntimeDefault,
+			},
 		}
 }
 
 // firecrackerSecurityContext configures security for Firecracker micro-VMs.
-// Stricter than gVisor: adds a Seccomp profile.
 func firecrackerSecurityContext() (*corev1.PodSecurityContext, *corev1.SecurityContext) {
-	uid := int64(1000)
+	uid := int64(65534)
 	return &corev1.PodSecurityContext{
 			RunAsNonRoot: boolPtr(true),
 			RunAsUser:    &uid,

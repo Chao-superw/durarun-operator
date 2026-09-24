@@ -10,6 +10,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -85,8 +86,7 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "  version                                  print version")
 }
 
-// parseArgs extracts the -n namespace flag and collects positional arguments
-// from a mixed argument list (supports both "name -n ns" and "-n ns name").
+// parseArgs extracts the -n namespace flag and collects positional arguments.
 func parseArgs(args []string) (positional []string, namespace string) {
 	namespace = "default"
 	for i := 0; i < len(args); i++ {
@@ -162,7 +162,8 @@ func cmdGet(c client.Client, args []string) {
 	for _, job := range list.Items {
 		age := formatDuration(time.Since(job.CreationTimestamp.Time))
 		attempts := job.Status.CompletedAttempts + job.Status.FailedAttempts
-		fmt.Fprintf(w, "%s\t%s\t%d\t%s\n", job.Name, job.Status.Phase, attempts, age)
+		phase := v1alpha1.JobPhaseFromConditions(job.Status.Conditions)
+		fmt.Fprintf(w, "%s\t%s\t%d\t%s\n", job.Name, phase, attempts, age)
 	}
 	w.Flush()
 }
@@ -186,10 +187,12 @@ func cmdDescribe(c client.Client, args []string) {
 		os.Exit(1)
 	}
 
+	phase := v1alpha1.JobPhaseFromConditions(job.Status.Conditions)
+
 	// Basic info.
 	fmt.Printf("Name:         %s\n", job.Name)
 	fmt.Printf("Namespace:    %s\n", job.Namespace)
-	fmt.Printf("Phase:        %s\n", job.Status.Phase)
+	fmt.Printf("Phase:        %s\n", phase)
 	fmt.Printf("Age:          %s\n", formatDuration(time.Since(job.CreationTimestamp.Time)))
 	if job.Status.StartTime != nil {
 		fmt.Printf("Start Time:   %s\n", job.Status.StartTime.Format(time.RFC3339))
@@ -200,19 +203,14 @@ func cmdDescribe(c client.Client, args []string) {
 
 	// Spec.
 	fmt.Printf("\nSpec:\n")
-	fmt.Printf("  Image:        %s\n", job.Spec.Image)
-	if len(job.Spec.Command) > 0 {
-		fmt.Printf("  Command:      %v\n", job.Spec.Command)
+	fmt.Printf("  Image:          %s\n", job.Spec.Runtime.Image)
+	if len(job.Spec.Runtime.Command) > 0 {
+		fmt.Printf("  Command:        %v\n", job.Spec.Runtime.Command)
 	}
-	if job.Spec.Prompt != "" {
-		fmt.Printf("  Prompt:       %s\n", job.Spec.Prompt)
+	if job.Spec.Execution.Timeout != nil {
+		fmt.Printf("  Timeout:        %s\n", job.Spec.Execution.Timeout.Duration)
 	}
-	fmt.Printf("  Timeout:      %s\n", job.Spec.Timeout)
-	fmt.Printf("  Max Retries:  %d\n", job.Spec.MaxRetries)
-	fmt.Printf("  Pool Ref:     %s\n", job.Spec.PoolRef)
-	fmt.Printf("  Isolation:    %s\n", job.Spec.Isolation.Level)
-	fmt.Printf("  Resources:    CPU=%s, Memory=%s\n",
-		job.Spec.Resources.CPULimit, job.Spec.Resources.MemoryLimit)
+	fmt.Printf("  Max Attempts:   %d\n", job.Spec.Execution.MaxAttempts)
 
 	// Status.
 	fmt.Printf("\nStatus:\n")
@@ -220,7 +218,7 @@ func cmdDescribe(c client.Client, args []string) {
 	fmt.Printf("  Failed Attempts:    %d\n", job.Status.FailedAttempts)
 	if job.Status.ActiveAttempt != nil {
 		fmt.Printf("  Active Attempt:     %s (#%d)\n",
-			job.Status.ActiveAttempt.Name, job.Status.ActiveAttempt.Number)
+			job.Status.ActiveAttempt.Name, job.Status.ActiveAttempt.Ordinal)
 	}
 
 	// Conditions.
@@ -231,7 +229,7 @@ func cmdDescribe(c client.Client, args []string) {
 		}
 	}
 
-	// List AgentAttempts belonging to this job (filter by spec.jobRef).
+	// List AgentAttempts belonging to this job.
 	var attemptList v1alpha1.AgentAttemptList
 	if err := c.List(ctx, &attemptList, client.InNamespace(namespace)); err != nil {
 		fmt.Fprintf(os.Stderr, "\nwarning: could not list attempts: %v\n", err)
@@ -240,7 +238,7 @@ func cmdDescribe(c client.Client, args []string) {
 
 	var jobAttempts []v1alpha1.AgentAttempt
 	for _, a := range attemptList.Items {
-		if a.Spec.JobRef == name {
+		if a.Spec.JobRef.Name == name {
 			jobAttempts = append(jobAttempts, a)
 		}
 	}
@@ -248,11 +246,12 @@ func cmdDescribe(c client.Client, args []string) {
 	if len(jobAttempts) > 0 {
 		fmt.Printf("\nAttempts:\n")
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintf(w, "  NAME\tNUMBER\tPHASE\tPOD\tAGE\n")
+		fmt.Fprintf(w, "  NAME\tORDINAL\tPHASE\tPOD\tAGE\n")
 		for _, a := range jobAttempts {
 			age := formatDuration(time.Since(a.CreationTimestamp.Time))
+			aPhase := v1alpha1.AttemptPhaseFromConditions(a.Status.Conditions)
 			fmt.Fprintf(w, "  %s\t%d\t%s\t%s\t%s\n",
-				a.Name, a.Spec.Number, a.Status.Phase, a.Status.PodName, age)
+				a.Name, a.Spec.Ordinal, aPhase, a.Status.PodName, age)
 		}
 		w.Flush()
 	}
@@ -301,15 +300,23 @@ func cmdCancel(c client.Client, args []string) {
 		os.Exit(1)
 	}
 
-	// Refuse if already in a terminal phase.
-	switch job.Status.Phase {
-	case v1alpha1.JobPhaseSucceeded, v1alpha1.JobPhaseFailed, v1alpha1.JobPhaseTerminated:
-		fmt.Fprintf(os.Stderr, "AgentJob %s is already in terminal phase: %s\n", name, job.Status.Phase)
+	// Refuse if already in a terminal state.
+	phase := v1alpha1.JobPhaseFromConditions(job.Status.Conditions)
+	if phase == "Succeeded" || phase == "Failed" {
+		fmt.Fprintf(os.Stderr, "AgentJob %s is already in terminal phase: %s\n", name, phase)
 		os.Exit(1)
 	}
 
-	// Set phase to Terminated.
-	job.Status.Phase = v1alpha1.JobPhaseTerminated
+	// Set Failed condition with reason Cancelled.
+	now := metav1.Now()
+	job.Status.Conditions = append(job.Status.Conditions, metav1.Condition{
+		Type:               v1alpha1.JobConditionFailed,
+		Status:             metav1.ConditionTrue,
+		Reason:             "Cancelled",
+		Message:            "Job cancelled by user",
+		LastTransitionTime: now,
+	})
+	job.Status.CompletionTime = &now
 	if err := c.Status().Update(ctx, job); err != nil {
 		fmt.Fprintf(os.Stderr, "error updating AgentJob status: %v\n", err)
 		os.Exit(1)

@@ -1,0 +1,94 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentattempts.durarun.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  labels:
+    app.kubernetes.io/part-of: durarun
+spec:
+  group: durarun.io
+  names:
+    kind: AgentAttempt
+    listKind: AgentAttemptList
+    plural: agentattempts
+    singular: agentattempt
+    shortNames:
+      - aat
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: JobRef
+          type: string
+          jsonPath: .spec.jobRef
+        - name: Number
+          type: integer
+          jsonPath: .spec.number
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: PodName
+          type: string
+          jsonPath: .status.podName
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: AgentAttempt is the Schema for the agentattempts API
+          type: object
+          required:
+            - spec
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              required:
+                - jobRef
+                - number
+              properties:
+                jobRef:
+                  description: Name of the parent AgentJob this attempt belongs to.
+                  type: string
+                number:
+                  description: Attempt number (1-based).
+                  type: integer
+                  format: int32
+                  minimum: 1
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum:
+                    - Pending
+                    - Running
+                    - Succeeded
+                    - Failed
+                podName:
+                  type: string
+                podUID:
+                  type: string
+                exitCode:
+                  type: integer
+                  format: int32
+                startTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                message:
+                  type: string
+                reason:
+                  type: string

@@ -5,40 +5,40 @@
     "target": "\u003c=+10%",
     "trials": [
       {
-        "avg_ms": 734.6666666666666,
-        "native_ms": 700,
-        "overhead%": 4.952380952380947,
+        "avg_ms": 734,
+        "native_ms": 701,
+        "overhead%": 4.70756062767475,
         "trial": 1
       },
       {
-        "avg_ms": 731.6666666666666,
-        "native_ms": 700,
-        "overhead%": 4.523809523809518,
+        "avg_ms": 739,
+        "native_ms": 701,
+        "overhead%": 5.420827389443652,
         "trial": 2
       },
       {
-        "avg_ms": 734.6666666666666,
+        "avg_ms": 735.6666666666666,
         "native_ms": 700,
-        "overhead%": 4.952380952380947,
+        "overhead%": 5.09523809523809,
         "trial": 3
       },
       {
-        "avg_ms": 736,
-        "native_ms": 700,
-        "overhead%": 5.142857142857142,
+        "avg_ms": 739.3333333333334,
+        "native_ms": 701,
+        "overhead%": 5.468378506894918,
         "trial": 4
       },
       {
-        "avg_ms": 735,
-        "native_ms": 700,
-        "overhead%": 5,
+        "avg_ms": 736,
+        "native_ms": 701,
+        "overhead%": 4.9928673323823105,
         "trial": 5
       }
     ],
-    "mean": 4.914285714285711,
-    "stddev": 0.20734801006740386,
+    "mean": 5.136974390326744,
+    "stddev": 0.2818886856963454,
     "pass": true,
-    "timestamp": "2026-09-23T04:55:55Z",
+    "timestamp": "2026-09-23T10:58:45Z",
     "environment": {
       "arch": "arm64",
       "cpus": "18",

@@ -63,6 +63,59 @@ var (
 			Help:      "Total UID fencing rejections",
 		},
 	)
+
+	ActiveJobs = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: "durarun",
+			Name:      "active_jobs",
+			Help:      "Currently active jobs",
+		},
+	)
+
+	ActiveAttempts = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: "durarun",
+			Name:      "active_attempts",
+			Help:      "Currently active attempts",
+		},
+	)
+
+	AdmissionTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "durarun",
+			Name:      "admission_total",
+			Help:      "Total admission decisions by result",
+		},
+		[]string{"result"},
+	)
+
+	RecoveryDuration = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Namespace: "durarun",
+			Name:      "recovery_duration_seconds",
+			Help:      "Time to recover from checkpoint",
+			Buckets:   prometheus.DefBuckets,
+		},
+	)
+
+	CheckpointDuration = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Namespace: "durarun",
+			Name:      "checkpoint_duration_seconds",
+			Help:      "Time to create checkpoint",
+			Buckets:   prometheus.DefBuckets,
+		},
+	)
+
+	JobDuration = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: "durarun",
+			Name:      "job_duration_seconds",
+			Help:      "Total job duration by result",
+			Buckets:   prometheus.ExponentialBuckets(1, 2, 15),
+		},
+		[]string{"result"},
+	)
 )
 
 func init() {
@@ -73,5 +126,11 @@ func init() {
 		CheckpointTotal,
 		CheckpointRestoreTotal,
 		FencingRejectTotal,
+		ActiveJobs,
+		ActiveAttempts,
+		AdmissionTotal,
+		RecoveryDuration,
+		CheckpointDuration,
+		JobDuration,
 	)
 }

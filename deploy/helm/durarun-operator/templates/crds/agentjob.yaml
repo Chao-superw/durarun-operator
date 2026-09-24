@@ -1,0 +1,171 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentjobs.durarun.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  labels:
+    app.kubernetes.io/part-of: durarun
+spec:
+  group: durarun.io
+  names:
+    kind: AgentJob
+    listKind: AgentJobList
+    plural: agentjobs
+    singular: agentjob
+    shortNames:
+      - aj
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: AgentJob is the Schema for the agentjobs API
+          type: object
+          required:
+            - spec
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  description: Container image to run for this agent job.
+                  type: string
+                command:
+                  description: Command to execute inside the container.
+                  type: array
+                  items:
+                    type: string
+                prompt:
+                  description: Prompt text to pass to the agent.
+                  type: string
+                timeout:
+                  description: Maximum duration the job is allowed to run.
+                  type: string
+                  default: "5m"
+                resources:
+                  type: object
+                  properties:
+                    cpuLimit:
+                      type: string
+                    memoryLimit:
+                      type: string
+                env:
+                  type: object
+                  additionalProperties:
+                    type: string
+                maxRetries:
+                  type: integer
+                  format: int32
+                isolation:
+                  type: object
+                  properties:
+                    level:
+                      type: string
+                      enum:
+                        - L0Process
+                        - L1GVisor
+                        - L2Firecracker
+                        - L3Docker
+                poolRef:
+                  type: string
+                stepTracking:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    protocol:
+                      type: string
+                      enum:
+                        - env
+                        - hook
+                        - adapter
+                checkpoint:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    bucket:
+                      type: string
+                    endpoint:
+                      type: string
+                    intervalSeconds:
+                      type: integer
+                      format: int32
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum:
+                    - Pending
+                    - Scheduling
+                    - Running
+                    - Recovering
+                    - Succeeded
+                    - Failed
+                    - Terminated
+                activeAttempt:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    number:
+                      type: integer
+                      format: int32
+                    uid:
+                      type: string
+                completedAttempts:
+                  type: integer
+                  format: int32
+                failedAttempts:
+                  type: integer
+                  format: int32
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - status
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                      reason:
+                        type: string
+                      message:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                startTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time

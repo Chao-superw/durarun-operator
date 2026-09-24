@@ -6,9 +6,13 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
+
+// Ensure corev1 import is used (for RuntimeSpec deep copy).
+var _ = corev1.EnvVar{}
 
 // --- AgentJob ---
 
@@ -40,21 +44,8 @@ func (in *AgentJob) DeepCopyObject() runtime.Object {
 
 func (in *AgentJobSpec) DeepCopyInto(out *AgentJobSpec) {
 	*out = *in
-	if in.Command != nil {
-		in, out := &in.Command, &out.Command
-		*out = make([]string, len(*in))
-		copy(*out, *in)
-	}
-	out.Resources = in.Resources
-	if in.Env != nil {
-		in, out := &in.Env, &out.Env
-		*out = make(map[string]string, len(*in))
-		for key, val := range *in {
-			(*out)[key] = val
-		}
-	}
-	out.Isolation = in.Isolation
-	out.StepTracking = in.StepTracking
+	in.Runtime.DeepCopyInto(&out.Runtime)
+	in.Execution.DeepCopyInto(&out.Execution)
 	out.Checkpoint = in.Checkpoint
 }
 
@@ -67,21 +58,119 @@ func (in *AgentJobSpec) DeepCopy() *AgentJobSpec {
 	return out
 }
 
+// --- RuntimeSpec ---
+
+func (in *RuntimeSpec) DeepCopyInto(out *RuntimeSpec) {
+	*out = *in
+	if in.Command != nil {
+		in, out := &in.Command, &out.Command
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.Args != nil {
+		in, out := &in.Args, &out.Args
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.Env != nil {
+		in, out := &in.Env, &out.Env
+		*out = make([]corev1.EnvVar, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
+	in.Resources.DeepCopyInto(&out.Resources)
+}
+
+func (in *RuntimeSpec) DeepCopy() *RuntimeSpec {
+	if in == nil {
+		return nil
+	}
+	out := new(RuntimeSpec)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// --- ExecutionSpec ---
+
+func (in *ExecutionSpec) DeepCopyInto(out *ExecutionSpec) {
+	*out = *in
+	if in.Timeout != nil {
+		in, out := &in.Timeout, &out.Timeout
+		*out = new(metav1.Duration)
+		**out = **in
+	}
+	if in.BackoffLimit != nil {
+		in, out := &in.BackoffLimit, &out.BackoffLimit
+		*out = new(metav1.Duration)
+		**out = **in
+	}
+	if in.ActiveDeadlineSeconds != nil {
+		in, out := &in.ActiveDeadlineSeconds, &out.ActiveDeadlineSeconds
+		*out = new(int64)
+		**out = **in
+	}
+	if in.TTLSecondsAfterFinished != nil {
+		in, out := &in.TTLSecondsAfterFinished, &out.TTLSecondsAfterFinished
+		*out = new(int32)
+		**out = **in
+	}
+}
+
+func (in *ExecutionSpec) DeepCopy() *ExecutionSpec {
+	if in == nil {
+		return nil
+	}
+	out := new(ExecutionSpec)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// --- CheckpointPolicy ---
+
+func (in *CheckpointPolicy) DeepCopyInto(out *CheckpointPolicy) {
+	*out = *in
+}
+
+func (in *CheckpointPolicy) DeepCopy() *CheckpointPolicy {
+	if in == nil {
+		return nil
+	}
+	out := new(CheckpointPolicy)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// --- AttemptReference ---
+
+func (in *AttemptReference) DeepCopyInto(out *AttemptReference) {
+	*out = *in
+}
+
+func (in *AttemptReference) DeepCopy() *AttemptReference {
+	if in == nil {
+		return nil
+	}
+	out := new(AttemptReference)
+	in.DeepCopyInto(out)
+	return out
+}
+
 // --- AgentJobStatus ---
 
 func (in *AgentJobStatus) DeepCopyInto(out *AgentJobStatus) {
 	*out = *in
-	if in.ActiveAttempt != nil {
-		in, out := &in.ActiveAttempt, &out.ActiveAttempt
-		*out = new(AttemptReference)
-		**out = **in
-	}
 	if in.Conditions != nil {
 		in, out := &in.Conditions, &out.Conditions
 		*out = make([]metav1.Condition, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
+	}
+	if in.ActiveAttempt != nil {
+		in, out := &in.ActiveAttempt, &out.ActiveAttempt
+		*out = new(AttemptReference)
+		**out = **in
 	}
 	if in.StartTime != nil {
 		in, out := &in.StartTime, &out.StartTime
@@ -133,7 +222,37 @@ func (in *AgentJobList) DeepCopyObject() runtime.Object {
 	return nil
 }
 
-// --- ResourceSpec ---
+// --- ObjectRef ---
+
+func (in *ObjectRef) DeepCopyInto(out *ObjectRef) {
+	*out = *in
+}
+
+func (in *ObjectRef) DeepCopy() *ObjectRef {
+	if in == nil {
+		return nil
+	}
+	out := new(ObjectRef)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// --- ArtifactRef ---
+
+func (in *ArtifactRef) DeepCopyInto(out *ArtifactRef) {
+	*out = *in
+}
+
+func (in *ArtifactRef) DeepCopy() *ArtifactRef {
+	if in == nil {
+		return nil
+	}
+	out := new(ArtifactRef)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// --- ResourceSpec (kept for SandboxPool) ---
 
 func (in *ResourceSpec) DeepCopyInto(out *ResourceSpec) {
 	*out = *in
@@ -148,7 +267,7 @@ func (in *ResourceSpec) DeepCopy() *ResourceSpec {
 	return out
 }
 
-// --- IsolationSpec ---
+// --- IsolationSpec (kept for SandboxPool) ---
 
 func (in *IsolationSpec) DeepCopyInto(out *IsolationSpec) {
 	*out = *in
@@ -163,58 +282,13 @@ func (in *IsolationSpec) DeepCopy() *IsolationSpec {
 	return out
 }
 
-// --- StepTrackingSpec ---
-
-func (in *StepTrackingSpec) DeepCopyInto(out *StepTrackingSpec) {
-	*out = *in
-}
-
-func (in *StepTrackingSpec) DeepCopy() *StepTrackingSpec {
-	if in == nil {
-		return nil
-	}
-	out := new(StepTrackingSpec)
-	in.DeepCopyInto(out)
-	return out
-}
-
-// --- CheckpointSpec ---
-
-func (in *CheckpointSpec) DeepCopyInto(out *CheckpointSpec) {
-	*out = *in
-}
-
-func (in *CheckpointSpec) DeepCopy() *CheckpointSpec {
-	if in == nil {
-		return nil
-	}
-	out := new(CheckpointSpec)
-	in.DeepCopyInto(out)
-	return out
-}
-
-// --- AttemptReference ---
-
-func (in *AttemptReference) DeepCopyInto(out *AttemptReference) {
-	*out = *in
-}
-
-func (in *AttemptReference) DeepCopy() *AttemptReference {
-	if in == nil {
-		return nil
-	}
-	out := new(AttemptReference)
-	in.DeepCopyInto(out)
-	return out
-}
-
 // --- AgentAttempt ---
 
 func (in *AgentAttempt) DeepCopyInto(out *AgentAttempt) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
-	out.Spec = in.Spec
+	in.Spec.DeepCopyInto(&out.Spec)
 	in.Status.DeepCopyInto(&out.Status)
 }
 
@@ -238,6 +312,11 @@ func (in *AgentAttempt) DeepCopyObject() runtime.Object {
 
 func (in *AgentAttemptSpec) DeepCopyInto(out *AgentAttemptSpec) {
 	*out = *in
+	out.JobRef = in.JobRef
+	if in.Deadline != nil {
+		in, out := &in.Deadline, &out.Deadline
+		*out = (*in).DeepCopy()
+	}
 }
 
 func (in *AgentAttemptSpec) DeepCopy() *AgentAttemptSpec {
@@ -253,6 +332,13 @@ func (in *AgentAttemptSpec) DeepCopy() *AgentAttemptSpec {
 
 func (in *AgentAttemptStatus) DeepCopyInto(out *AgentAttemptStatus) {
 	*out = *in
+	if in.Conditions != nil {
+		in, out := &in.Conditions, &out.Conditions
+		*out = make([]metav1.Condition, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	if in.StartTime != nil {
 		in, out := &in.StartTime, &out.StartTime
 		*out = (*in).DeepCopy()
@@ -266,12 +352,15 @@ func (in *AgentAttemptStatus) DeepCopyInto(out *AgentAttemptStatus) {
 		*out = new(int32)
 		**out = **in
 	}
-	if in.StepProgress != nil {
-		in, out := &in.StepProgress, &out.StepProgress
-		*out = make([]StepStatus, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
+	if in.Signal != nil {
+		in, out := &in.Signal, &out.Signal
+		*out = new(int32)
+		**out = **in
+	}
+	if in.ArtifactRef != nil {
+		in, out := &in.ArtifactRef, &out.ArtifactRef
+		*out = new(ArtifactRef)
+		**out = **in
 	}
 }
 
@@ -313,29 +402,6 @@ func (in *AgentAttemptList) DeepCopyObject() runtime.Object {
 		return c
 	}
 	return nil
-}
-
-// --- StepStatus ---
-
-func (in *StepStatus) DeepCopyInto(out *StepStatus) {
-	*out = *in
-	if in.StartTime != nil {
-		in, out := &in.StartTime, &out.StartTime
-		*out = (*in).DeepCopy()
-	}
-	if in.CompletionTime != nil {
-		in, out := &in.CompletionTime, &out.CompletionTime
-		*out = (*in).DeepCopy()
-	}
-}
-
-func (in *StepStatus) DeepCopy() *StepStatus {
-	if in == nil {
-		return nil
-	}
-	out := new(StepStatus)
-	in.DeepCopyInto(out)
-	return out
 }
 
 // --- SandboxPool ---

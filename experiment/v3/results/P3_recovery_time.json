@@ -5,40 +5,40 @@
     "target": "\u003c=0.50x",
     "trials": [
       {
-        "native_ms": 700,
-        "ratio": 0.44571428571428573,
-        "recovery_ms": 312,
+        "native_ms": 701,
+        "ratio": 0.44365192582025675,
+        "recovery_ms": 311,
         "trial": 1
       },
       {
-        "native_ms": 700,
-        "ratio": 0.4442857142857143,
-        "recovery_ms": 311,
+        "native_ms": 701,
+        "ratio": 0.4450784593437946,
+        "recovery_ms": 312,
         "trial": 2
       },
       {
         "native_ms": 700,
-        "ratio": 0.4442857142857143,
-        "recovery_ms": 311,
+        "ratio": 0.44571428571428573,
+        "recovery_ms": 312,
         "trial": 3
       },
       {
         "native_ms": 700,
-        "ratio": 0.44571428571428573,
-        "recovery_ms": 312,
+        "ratio": 0.4471428571428571,
+        "recovery_ms": 313,
         "trial": 4
       },
       {
-        "native_ms": 700,
-        "ratio": 0.44571428571428573,
-        "recovery_ms": 312,
+        "native_ms": 701,
+        "ratio": 0.44365192582025675,
+        "recovery_ms": 311,
         "trial": 5
       }
     ],
-    "mean": 0.4451428571428572,
-    "stddev": 0.0006998542122237736,
+    "mean": 0.44504789076829016,
+    "stddev": 0.001321464115645889,
     "pass": true,
-    "timestamp": "2026-09-23T04:55:48Z",
+    "timestamp": "2026-09-23T10:58:38Z",
     "environment": {
       "arch": "arm64",
       "cpus": "18",
